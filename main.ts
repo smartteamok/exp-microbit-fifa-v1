@@ -1,5 +1,5 @@
 /**
- * Bloques personalizados para Beat Mundial
+ * Bloques personalizados para FIFA Foundation
  */
 
 enum BeatMotor {
@@ -124,7 +124,7 @@ enum BeatLedSeleccion {
     Led5 = 5
 }
 
-//% color="#ed6a22" weight=100 icon="\uf1e3" block="Beat Mundial"
+//% color="#ed6a22" weight=100 icon="\uf1e3" block="FIFA Foundation"
 //% groups='["Configuración","Entradas Digitales","Entradas Analógicas","Motores","Visualización"]'
 namespace beatMundial {
 

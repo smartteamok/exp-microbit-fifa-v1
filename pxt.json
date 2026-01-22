@@ -1,7 +1,7 @@
 {
-    "name": "Beat Mundial",
+    "name": "FIFA Foundation",
     "version": "1.4.0",
-    "description": "Extensión para el kit Beat Mundial de FIFA Foundation",
+    "description": "Extensión para el kit del Digital Education Programme de FIFA Foundation",
     "license": "MIT",
     "dependencies": {
         "core": "*",
