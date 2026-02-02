@@ -276,13 +276,13 @@ namespace beatMundial {
 
     /**
      * Lee la distancia en cm usando el sensor ultrasónico conectado al pin 1.
-     * Devuelve texto para mostrar directamente en pantalla.
+     * Devuelve un entero (número de cm).
      */
     //% block="Distancia (cm) en %puerto"
     //% puerto.defl=BeatPuerto.Puerto1
     //% group="Entradas Digitales"
     //% weight=40
-    export function leerDistancia(puerto: BeatPuerto): string {
+    export function leerDistancia(puerto: BeatPuerto): number {
         // Pines fijos para el conector 1 (Ultrasonido)
         pins.digitalWritePin(DigitalPin.P2, 0);
         control.waitMicros(2);
@@ -291,9 +291,9 @@ namespace beatMundial {
         pins.digitalWritePin(DigitalPin.P2, 0);
         
         let d = pins.pulseIn(DigitalPin.P1, PulseValue.High, 25000);
-        if (d == 0) return "0";
+        if (d == 0) return 0;
         
-        return "" + Math.floor(d / 58);
+        return Math.floor(d / 58);
     }
 
     // --- GRUPO: MOTORES ---
