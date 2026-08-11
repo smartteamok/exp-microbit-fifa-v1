@@ -158,7 +158,7 @@ namespace beatMundial {
     /**
      * Mueve el robot en la dirección indicada a velocidad media (50%).
      */
-    //% block="Mover %direccion %motor"
+    //% block="Movimiento ｜ %direccion %motor"
     //% motor.defl=BeatMotor.Ambos
     //% group="Motores"
     //% color="#221E1F"
@@ -170,7 +170,7 @@ namespace beatMundial {
     /**
      * Mueve el robot controlando dirección y velocidad (0 a 100).
      */
-    //% block="Mover %direccion %motor con velocidad %velocidad"
+    //% block="Movimiento ｜ %direccion %motor con velocidad %velocidad"
     //% motor.defl=BeatMotor.Ambos
     //% velocidad.min=0 velocidad.max=100 velocidad.defl=100
     //% group="Motores"
@@ -231,7 +231,7 @@ namespace beatMundial {
     /**
      * Detiene los motores seleccionados.
      */
-    //% block="Parar %motor"
+    //% block="Parar ｜ %motor"
     //% group="Motores"
     //% color="#221E1F"
     //% weight=80
@@ -251,7 +251,7 @@ namespace beatMundial {
     /**
      * Comprueba la posición de la línea en el pin 1.
      */
-    //% block="siguelíneas %posicion en %puerto"
+    //% block="Sigue líneas ｜ %posicion en %puerto"
     //% puerto.defl=BeatPuerto.Puerto1
     //% group="Sensores digitales"
     //% color="#979592"
@@ -284,7 +284,7 @@ namespace beatMundial {
      * Lee la distancia en cm usando el sensor ultrasónico conectado al pin 1.
      * Devuelve un entero (número de cm).
      */
-    //% block="Distancia (cm) en %puerto"
+    //% block="Ultrasónico ｜ Distancia (cm) en %puerto"
     //% puerto.defl=BeatPuerto.Puerto1
     //% group="Sensores digitales"
     //% color="#CC1F26"
@@ -308,12 +308,13 @@ namespace beatMundial {
     /**
      * Controla el ventilador conectado al Puerto 1 (P2 y P1).
      */
-    //% block="Ventilador %accion"
+    //% block="Hélice ｜ %accion en %puerto"
     //% accion.defl=BeatFanAccion.Parar
+    //% puerto.defl=BeatPuerto.Puerto1
     //% group="Motores"
     //% color="#CC1F26"
     //% weight=95
-    export function ventilador(accion: BeatFanAccion): void {
+    export function ventilador(accion: BeatFanAccion, puerto: BeatPuerto): void {
         switch (accion) {
             case BeatFanAccion.Izquierda:
                 pins.digitalWritePin(DigitalPin.P2, 1);
@@ -333,7 +334,7 @@ namespace beatMundial {
     /**
      * Posiciona un servo en el puerto seleccionado.
      */
-    //% block="Posicionar servo en %puerto a %grados°"
+    //% block="Servo ｜ %grados ° en %puerto"
     //% grados.min=0 grados.max=180 grados.defl=90
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Motores"
@@ -349,7 +350,7 @@ namespace beatMundial {
     /**
      * Mueve el servo gradualmente hasta el ángulo deseado.
      */
-    //% block="Mover servo en %puerto a %grados° gradualmente cada %ms ms"
+    //% block="Servo ｜ %grados ° gradualmente cada %ms ms en %puerto"
     //% grados.min=0 grados.max=180 grados.defl=90
     //% ms.min=1 ms.defl=10
     //% puerto.defl=BeatPuerto.Puerto0
@@ -380,7 +381,7 @@ namespace beatMundial {
     /**
      * Lee humedad de suelo en el puerto seleccionado.
      */
-    //% block="Humedad de suelo en %puerto"
+    //% block="Humedad de suelo ｜ en %puerto"
     //% puerto.defl=BeatPuertoAnalog.Puerto0
     //% group="Sensores analógicos"
     //% color="#DA418A"
@@ -392,7 +393,7 @@ namespace beatMundial {
     /**
      * Lee intensidad de luz en el puerto seleccionado.
      */
-    //% block="Intensidad luminosa en %puerto"
+    //% block="Sensor de luz ｜ en %puerto"
     //% puerto.defl=BeatPuertoAnalog.Puerto0
     //% group="Sensores analógicos"
     //% color="#DA418A"
@@ -404,7 +405,7 @@ namespace beatMundial {
     /**
      * Lee potenciómetro en el puerto seleccionado.
      */
-    //% block="Posición potenciómetro en %puerto"
+    //% block="Potenciómetro ｜ en %puerto"
     //% puerto.defl=BeatPuertoAnalog.Puerto0
     //% group="Sensores analógicos"
     //% color="#DA418A"
@@ -416,7 +417,7 @@ namespace beatMundial {
     /**
      * Lee el nivel de R, G o B del sensor de color TCS34725.
      */
-    //% block="Nivel de %canal en sensor de color"
+    //% block="Sensor de color ｜ Nivel de %canal"
     //% canal.defl=BeatColorCanal.Rojo
     //% group="Sensores analógicos"
     //% color="#89267F"
@@ -437,7 +438,7 @@ namespace beatMundial {
      * Detecta si el color dominante coincide con la selección.
      * Devuelve 1 si coincide, 0 si no.
      */
-    //% block="Color detectado es %color"
+    //% block="Sensor de color ｜ Color detectado es %color"
     //% color.defl=BeatColorDetectado.Rojo
     //% group="Sensores analógicos"
     //% color="#89267F"
@@ -467,7 +468,7 @@ namespace beatMundial {
      * Lee el joystick del Puerto 1.
      * Eje X y Y devuelven 0-1023, pulsador devuelve 0 o 1.
      */
-    //% block="Joystick %eje en %puerto"
+    //% block="Joystick ｜ %eje en %puerto"
     //% eje.defl=BeatJoystickEje.EjeX
     //% puerto.defl=BeatPuertoJoystick.Puerto1
     //% group="Sensores analógicos"
@@ -488,7 +489,7 @@ namespace beatMundial {
     /**
      * Lee el estado de un botón táctil digital.
      */
-    //% block="Táctil en %puerto"
+    //% block="Táctil ｜ en %puerto"
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Sensores digitales"
     //% color="#4F98CE"
@@ -500,7 +501,7 @@ namespace beatMundial {
     /**
      * Lee el estado de un pulsador digital.
      */
-    //% block="Pulsador en %puerto"
+    //% block="Pulsador ｜ en %puerto"
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Sensores digitales"
     //% color="#4F98CE"
@@ -513,7 +514,7 @@ namespace beatMundial {
      * Lee temperatura (°C) del DHT11. Devuelve entero.
      * Devuelve -1 si la lectura falla.
      */
-    //% block="Temperatura DHT11 (°C) en %puerto"
+    //% block="DTH11 ｜ Temperautra (°C) en %puerto"
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Sensores digitales"
     //% color="#4F98CE"
@@ -528,7 +529,7 @@ namespace beatMundial {
      * Lee humedad (%) del DHT11. Devuelve entero.
      * Devuelve -1 si la lectura falla.
      */
-    //% block="Humedad DHT11 en %puerto"
+    //% block="DTH11 ｜ Humedad (%) en %puerto"
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Sensores digitales"
     //% color="#4F98CE"
@@ -544,7 +545,7 @@ namespace beatMundial {
     /**
      * Borra la pantalla LCD.
      */
-    //% block="Borrar Pantalla LCD"
+    //% block="LCD ｜ Borrar pantalla"
     //% group="Pantallas"
     //% color="#89267F"
     //% weight=48
@@ -557,7 +558,7 @@ namespace beatMundial {
     /**
      * Muestra texto en la posición (x, y).
      */
-    //% block="Pantalla LCD mostrar %texto en x %x y %y"
+    //% block="LCD ｜ mostrar %texto en x %x y %y"
     //% x.min=0 x.max=15 x.defl=0
     //% y.min=0 y.max=1 y.defl=0
     //% group="Pantallas"
@@ -575,7 +576,7 @@ namespace beatMundial {
     /**
      * Enciende toda la tira RGB o un LED con un color.
      */
-    //% block="Tira RGB en %puerto mostrar color %color en %led"
+    //% block="Tira RGB ｜ mostrar color %color en %led en %puerto"
     //% color.shadow="colorNumberPicker"
     //% led.defl=BeatLedSeleccion.Todos
     //% puerto.defl=BeatPuerto.Puerto0
@@ -595,7 +596,7 @@ namespace beatMundial {
     /**
      * Ajusta el color de un LED individual.
      */
-    //% block="Tira RGB en %puerto LED %led R %r G %g B %b"
+    //% block="Tira RGB ｜ LED %led R %r G %g B %b en %puerto"
     //% led.defl=BeatLedIndex.Led0
     //% r.min=0 r.max=255 r.defl=255
     //% g.min=0 g.max=255 g.defl=0
@@ -614,7 +615,7 @@ namespace beatMundial {
     /**
      * Apaga la tira RGB.
      */
-    //% block="Tira RGB en %puerto apagar"
+    //% block="Tira RGB ｜ Apagar en %puerto"
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Salidas"
     //% color="#4F98CE"
