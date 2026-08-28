@@ -1,6 +1,6 @@
 {
     "name": "FIFA Foundation",
-    "version": "1.5.1",
+    "version": "1.8.0",
     "description": "Extensión para el kit del Digital Education Programme de FIFA Foundation",
     "license": "MIT",
     "dependencies": {
@@ -12,7 +12,9 @@
     "files": [
         "README.md",
         "main.ts",
-        "icon.png"
+        "icon.png",
+        "_locales/es/FIFA Foundation-strings.json",
+        "_locales/es/FIFA Foundation-jsdoc-strings.json"
     ],
     "testFiles": [
         "test.ts"
