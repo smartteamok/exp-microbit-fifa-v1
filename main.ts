@@ -448,15 +448,14 @@ namespace beatMundial {
     }
 
     /**
-     * Detects whether the dominant color matches the selection.
-     * Returns 1 if it matches, 0 otherwise.
+     * Returns true if the dominant color matches the selection.
      */
     //% block="Color sensor ｜ detected color is %tonoBuscado"
     //% tonoBuscado.defl=BeatColorDetectado.Rojo
     //% group="Analog sensors"
     //% color="#89267F"
     //% weight=64
-    export function colorDetectado(tonoBuscado: BeatColorDetectado): number {
+    export function colorDetectado(tonoBuscado: BeatColorDetectado): boolean {
         const rgb = tcs34725ReadRgb();
         const r = tcs34725ToAnalog(rgb[0]);
         const g = tcs34725ToAnalog(rgb[1]);
@@ -474,7 +473,7 @@ namespace beatMundial {
                 detected = b > min && b > r && b > g;
                 break;
         }
-        return detected ? 1 : 0;
+        return detected;
     }
 
     /**
@@ -587,19 +586,35 @@ namespace beatMundial {
     }
 
     /**
-     * Shows fixed text on the 8x8 matrix.
-     * Only 8 columns fit at once: the first 8 columns of the rendered
-     * text are shown.
+     * Draws a pattern on the 8x8 matrix by picking the LEDs on the grid.
      */
-    //% block="Matrix ｜ Write %texto on %puerto"
-    //% texto.defl="abc"
+    //% blockId=beatmundial_matriz_dibujar
+    //% block="Matrix ｜ Draw on %puerto"
+    //% gridLiteral=1
+    //% imageLiteralColumns=8
+    //% imageLiteralRows=8
+    //% imageLiteralScale=0.8
+    //% inlineInputMode=external
     //% puerto.defl=BeatPuertoI2C.IIC
     //% group="Displays"
     //% color="#89267F"
     //% weight=44
-    export function matrizEscribir(texto: string, puerto: BeatPuertoI2C): void {
+    export function matrizDibujar(dibujo: string, puerto: BeatPuertoI2C): void {
         matrizInit();
-        matrizDibujarVentana(matrizColumnasTexto(texto), 0);
+        const cols = [0, 0, 0, 0, 0, 0, 0, 0];
+        let i = 0;
+        for (let p = 0; p < dibujo.length && i < 64; p++) {
+            // '#' 35, '*' 42, '1' 49 encendido; '.' 46, '0' 48, '_' 95 apagado.
+            // El resto (espacios, saltos de linea, tabulaciones) se ignora.
+            const c = dibujo.charCodeAt(p);
+            if (c == 35 || c == 42 || c == 49) {
+                cols[i % 8] |= (1 << (i >> 3));
+                i++;
+            } else if (c == 46 || c == 48 || c == 95) {
+                i++;
+            }
+        }
+        matrizDibujarVentana(cols, 0);
     }
 
     /**

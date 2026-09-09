@@ -1,6 +1,6 @@
 {
   "BeatMotor": "Bloques personalizados para FIFA Foundation",
-  "beatMundial.colorDetectado": "Detecta si el color dominante coincide con la selección.\nDevuelve 1 si coincide, 0 si no.",
+  "beatMundial.colorDetectado": "Devuelve verdadero si el color dominante coincide con la selección.",
   "beatMundial.deshabilitarMatriz": "Desactiva la matriz de LEDs de la micro:bit.\nÚsalo en \"Al iniciar\" para evitar interferencias con el sensor de línea (P10).",
   "beatMundial.habilitarMatriz": "Activa la matriz de LEDs de la micro:bit.",
   "beatMundial.lcdBorrar": "Borra la pantalla LCD.",
@@ -18,7 +18,7 @@
   "beatMundial.leerTemperaturaDHT11": "Lee temperatura (°C) del DHT11. Devuelve entero.\nDevuelve -1 si la lectura falla.",
   "beatMundial.matrizBorrar": "Apaga todos los LEDs de la matriz 8x8.",
   "beatMundial.matrizDesplazar": "Desplaza texto de derecha a izquierda por la matriz 8x8.\nBloquea la ejecución hasta que termina el recorrido.",
-  "beatMundial.matrizEscribir": "Muestra texto fijo en la matriz 8x8.\nEn 8 columnas solo cabe un carácter: se muestran las 8 primeras\ncolumnas del texto renderizado.",
+  "beatMundial.matrizDibujar": "Dibuja un patrón en la matriz 8x8 eligiendo los LEDs en la grilla.",
   "beatMundial.mover": "Mueve el robot en la dirección indicada a velocidad media (50%).",
   "beatMundial.moverVelocidad": "Mueve el robot controlando dirección y velocidad (0 a 100).",
   "beatMundial.parar": "Detiene los motores seleccionados.",
