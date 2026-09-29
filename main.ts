@@ -136,7 +136,7 @@ enum BeatLedSeleccion {
     Led5 = 5
 }
 
-//% color="#ed6a22" weight=100 icon="" block="FIFA Foundation"
+//% color="#ed6a22" weight=200 icon="" block="FIFA Foundation"
 //% groups='["Setup","Digital sensors","Analog sensors","Outputs","Motors","Displays"]'
 namespace beatMundial {
 
@@ -589,17 +589,16 @@ namespace beatMundial {
      * Draws a pattern on the 8x8 matrix by picking the LEDs on the grid.
      */
     //% blockId=beatmundial_matriz_dibujar
-    //% block="Matrix ｜ Draw on %puerto"
+    //% block="Matrix ｜ Draw on I2C"
     //% gridLiteral=1
     //% imageLiteralColumns=8
     //% imageLiteralRows=8
     //% imageLiteralScale=0.8
     //% inlineInputMode=external
-    //% puerto.defl=BeatPuertoI2C.IIC
     //% group="Displays"
     //% color="#89267F"
     //% weight=44
-    export function matrizDibujar(dibujo: string, puerto: BeatPuertoI2C): void {
+    export function matrizDibujar(dibujo: string, puerto?: BeatPuertoI2C): void {
         matrizInit();
         const cols = [0, 0, 0, 0, 0, 0, 0, 0];
         let i = 0;
@@ -681,13 +680,13 @@ namespace beatMundial {
     //% color="#4F98CE"
     //% weight=44
     export function tiraRgbColor(tono: number, led: BeatLedSeleccion, puerto: BeatPuerto): void {
-        const strip = neoPixelStrip(puerto);
+        const buf = tiraRgbBuffer(puerto);
         if (led === BeatLedSeleccion.Todos) {
-            strip.showColor(tono);
-            return;
+            for (let i = 0; i < TIRA_RGB_LEDS; i++) tiraRgbSetPixel(buf, i, tono);
+        } else {
+            tiraRgbSetPixel(buf, <number>led, tono);
         }
-        strip.setPixelColor(<number>led, tono);
-        strip.show();
+        tiraRgbMostrar(buf, puerto);
     }
 
     /**
@@ -704,10 +703,11 @@ namespace beatMundial {
     //% color="#4F98CE"
     //% weight=42
     export function tiraRgbLed(led: BeatLedIndex, r: number, g: number, b: number, puerto: BeatPuerto): void {
-        const strip = neoPixelStrip(puerto);
-        const index = clamp(<number>led, 0, 5);
-        strip.setPixelColor(index, neopixel.rgb(clamp(r, 0, 255), clamp(g, 0, 255), clamp(b, 0, 255)));
-        strip.show();
+        const buf = tiraRgbBuffer(puerto);
+        const index = clamp(<number>led, 0, TIRA_RGB_LEDS - 1);
+        const tono = (clamp(r, 0, 255) << 16) | (clamp(g, 0, 255) << 8) | clamp(b, 0, 255);
+        tiraRgbSetPixel(buf, index, tono);
+        tiraRgbMostrar(buf, puerto);
     }
 
     /**
@@ -719,9 +719,9 @@ namespace beatMundial {
     //% color="#4F98CE"
     //% weight=41
     export function tiraRgbApagar(puerto: BeatPuerto): void {
-        const strip = neoPixelStrip(puerto);
-        strip.clear();
-        strip.show();
+        const buf = tiraRgbBuffer(puerto);
+        buf.fill(0);
+        tiraRgbMostrar(buf, puerto);
     }
 
     // --- UTILIDADES INTERNAS ---
@@ -740,9 +740,10 @@ namespace beatMundial {
     const TCS34725_RDATAL = 0x16;
     const TCS34725_GDATAL = 0x18;
     const TCS34725_BDATAL = 0x1A;
-    const NEOPIXEL_COUNT = 6;
+    const TIRA_RGB_LEDS = 6;
+    const TIRA_RGB_BRILLO = 128;        // 0 a 255, mismo valor por defecto que usaba neopixel
     const servoPosiciones = [90, 90, 90, 90];
-    const neoStrips: neopixel.Strip[] = [null, null, null, null];
+    const tiraRgbBuffers: Buffer[] = [null, null, null, null];
     let tcs34725Inicializado = false;
     const HT16K33_ADDR = 0x70;
     const HT16K33_BRILLO = 15;          // 0 a 15
@@ -896,14 +897,28 @@ namespace beatMundial {
 
     const MATRIZ_FUENTE = hex`000000000000005f00000007000700147f147f14242a7f2a12231308646236495620500008070300001c2241000041221c002a1c7f1c2a08083e080800807030000808080808000060600020100804023e5149453e00427f400072494949462141494d331814127f1027454545393c4a49493141211109073649494936464949291e0000140000004034000000081422411414141414004122140802015909063e415d594e7c1211127c7f494949363e414141227f4141413e7f494949417f090909013e414151737f0808087f00417f41002040413f017f081422417f404040407f021c027f7f0408107f3e4141413e7f090909063e4151215e7f09192946264949493203017f01033f4040403f1f2040201f3f4038403f631408146303047804036159494d43007f4141410204081020004141417f04020102044040404040000307080020545478407f284444383844444428384444287f385454541800087e090218a4a49c787f0804047800447d40002040403d007f1028440000417f40007c047804787c080404783844444438fc1824241818242418fc7c08040408485454542404043f44243c4040207c1c2040201c3c4030403c44281028444c9090907c4464544c440008364100000077000000413608000201020402`;
 
-    function neoPixelStrip(puerto: BeatPuerto): neopixel.Strip {
+    function tiraRgbBuffer(puerto: BeatPuerto): Buffer {
         const index = puertoIndex(puerto);
-        let strip = neoStrips[index];
-        if (!strip) {
-            strip = neopixel.create(getDigitalPin(puerto), NEOPIXEL_COUNT, NeoPixelMode.RGB);
-            neoStrips[index] = strip;
+        let buf = tiraRgbBuffers[index];
+        if (!buf) {
+            buf = pins.createBuffer(TIRA_RGB_LEDS * 3);
+            tiraRgbBuffers[index] = buf;
         }
-        return strip;
+        return buf;
+    }
+
+    // Guarda un color 0xRRGGBB en el buffer, en el orden GRB que esperan los WS2812B.
+    function tiraRgbSetPixel(buf: Buffer, led: number, tono: number): void {
+        const r = (((tono >> 16) & 0xFF) * TIRA_RGB_BRILLO) >> 8;
+        const g = (((tono >> 8) & 0xFF) * TIRA_RGB_BRILLO) >> 8;
+        const b = ((tono & 0xFF) * TIRA_RGB_BRILLO) >> 8;
+        buf[led * 3] = g;
+        buf[led * 3 + 1] = r;
+        buf[led * 3 + 2] = b;
+    }
+
+    function tiraRgbMostrar(buf: Buffer, puerto: BeatPuerto): void {
+        light.sendWS2812Buffer(buf, getDigitalPin(puerto));
     }
 
     function getAnalogPin(puerto: BeatPuertoAnalog): AnalogPin {

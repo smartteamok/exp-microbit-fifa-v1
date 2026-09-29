@@ -64,7 +64,7 @@
   "beatMundial.matrizBorrar|block": "Matriz ｜ Borrar en %puerto",
   "beatMundial.matrizDesplazar|block": "Matriz ｜ Desplazar %texto cada %ms ms en %puerto",
   "beatMundial.matrizDesplazar|param|texto|defl": "abc",
-  "beatMundial.matrizDibujar|block": "Matriz ｜ Dibujar en %puerto",
+  "beatMundial.matrizDibujar|block": "Matriz ｜ Dibujar en I2C",
   "beatMundial.moverVelocidad|block": "Movimiento ｜ %direccion %motor con velocidad %velocidad",
   "beatMundial.mover|block": "Movimiento ｜ %direccion %motor",
   "beatMundial.parar|block": "Parar ｜ %motor",
