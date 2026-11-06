@@ -110,7 +110,7 @@ enum BeatMagnitudDHT {
 }
 
 //% color="#ed6a22" weight=200 icon="" block="FIFA Foundation"
-//% groups='["Events","Logic inputs","Numeric inputs","Outputs","Motors"]'
+//% groups='["Events","Logic inputs","Numeric inputs","Outputs","Motors","More"]'
 namespace beatMundial {
 
     // Colores por función:
@@ -118,13 +118,19 @@ namespace beatMundial {
     //   medio  #D9591A -> salidas (pantallas y LEDs)
     //   oscuro #9E3E10 -> motores
     // MakeCode exige el valor literal en cada anotación //% color.
+    //
+    // Parámetros en los textos de bloque: usar siempre $nombre, nunca %nombre.
+    // Con %nombre MakeCode empareja por POSICIÓN (el primer %x del texto recibe el
+    // primer parámetro de la función), lo que mezcla entradas cuando el orden del
+    // texto o de la traducción difiere de la firma, y rompe los bloques con grilla.
+    // Con $nombre empareja por nombre.
 
     // --- GRUPO: EVENTOS ---
 
     /**
      * Runs the code inside when the button on the port is pressed.
      */
-    //% block="on BUTTON pressed on %puerto"
+    //% block="on BUTTON pressed on $puerto"
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Events"
     //% color="#F28B3A"
@@ -136,7 +142,7 @@ namespace beatMundial {
     /**
      * Runs the code inside when the touch sensor on the port is touched.
      */
-    //% block="on TOUCH on %puerto"
+    //% block="on TOUCH on $puerto"
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Events"
     //% color="#F28B3A"
@@ -148,7 +154,7 @@ namespace beatMundial {
     /**
      * Runs the code inside when the obstacle sensor detects something.
      */
-    //% block="on OBSTACLE on %puerto"
+    //% block="on OBSTACLE on $puerto"
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Events"
     //% color="#F28B3A"
@@ -161,7 +167,7 @@ namespace beatMundial {
      * Runs the code inside when the ultrasonic sensor measures less than
      * the given distance (cm).
      */
-    //% block="if DISTANCE is less than %distancia cm on %puerto"
+    //% block="if DISTANCE is less than $distancia cm on $puerto"
     //% distancia.min=2 distancia.max=400 distancia.defl=20
     //% puerto.defl=BeatPuertoUno.Puerto1
     //% group="Events"
@@ -177,7 +183,7 @@ namespace beatMundial {
     /**
      * Runs the code inside when the color sensor detects the selected color.
      */
-    //% block="on COLOR %tono detected on %puerto"
+    //% block="on COLOR $tono detected on $puerto"
     //% tono.defl=BeatColorDetectado.Rojo
     //% puerto.defl=BeatPuertoI2C.IIC
     //% group="Events"
@@ -190,7 +196,7 @@ namespace beatMundial {
     /**
      * Runs the code inside when the joystick axis moves away from the center.
      */
-    //% block="on JOYSTICK %eje change on %puerto"
+    //% block="on JOYSTICK $eje change on $puerto"
     //% eje.defl=BeatJoystickEje.EjeX
     //% puerto.defl=BeatPuertoUno.Puerto1
     //% group="Events"
@@ -203,7 +209,7 @@ namespace beatMundial {
     /**
      * Runs the code inside when the line follower reaches the selected position.
      */
-    //% block="on LINE %posicion on %puerto"
+    //% block="on LINE $posicion on $puerto"
     //% posicion.defl=BeatPosicionLinea.Centro
     //% puerto.defl=BeatPuertoUno.Puerto1
     //% group="Events"
@@ -218,7 +224,7 @@ namespace beatMundial {
     /**
      * Reads the state of a digital push button.
      */
-    //% block="BUTTON pressed on %puerto"
+    //% block="BUTTON pressed on $puerto"
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Logic inputs"
     //% color="#F28B3A"
@@ -230,7 +236,7 @@ namespace beatMundial {
     /**
      * Reads the state of a digital touch sensor.
      */
-    //% block="TOUCH detected on %puerto"
+    //% block="TOUCH detected on $puerto"
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Logic inputs"
     //% color="#F28B3A"
@@ -242,7 +248,7 @@ namespace beatMundial {
     /**
      * Returns true while the joystick button is pressed.
      */
-    //% block="JOYSTICK pressed on %puerto"
+    //% block="JOYSTICK pressed on $puerto"
     //% puerto.defl=BeatPuertoUno.Puerto1
     //% group="Logic inputs"
     //% color="#F28B3A"
@@ -256,7 +262,7 @@ namespace beatMundial {
      * Checks the line position.
      * Pins: P10 left, P1 center, P2 right.
      */
-    //% block="LINE %posicion on %puerto"
+    //% block="LINE $posicion on $puerto"
     //% puerto.defl=BeatPuertoUno.Puerto1
     //% group="Logic inputs"
     //% color="#F28B3A"
@@ -287,7 +293,7 @@ namespace beatMundial {
     /**
      * Returns true if the dominant color matches the selection.
      */
-    //% block="COLOR %tonoBuscado detected on %puerto"
+    //% block="COLOR $tonoBuscado detected on $puerto"
     //% tonoBuscado.defl=BeatColorDetectado.Rojo
     //% puerto.defl=BeatPuertoI2C.IIC
     //% group="Logic inputs"
@@ -318,7 +324,7 @@ namespace beatMundial {
      * Returns true when the obstacle sensor detects something.
      * The sensor outputs 0 when there is an obstacle and 1 when there is none.
      */
-    //% block="OBSTACLE detected on %puerto"
+    //% block="OBSTACLE detected on $puerto"
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Logic inputs"
     //% color="#F28B3A"
@@ -334,7 +340,7 @@ namespace beatMundial {
      * Pins: P2 trigger, P1 echo. Returns an integer of cm and 0 if
      * there is no echo.
      */
-    //% block="DISTANCE (cm) on %puerto"
+    //% block="DISTANCE (cm) on $puerto"
     //% puerto.defl=BeatPuertoUno.Puerto1
     //% group="Numeric inputs"
     //% color="#F28B3A"
@@ -356,7 +362,7 @@ namespace beatMundial {
      * Reads temperature (°C) or humidity (%) from the DHT11.
      * Returns an integer, or -1 if the reading fails.
      */
-    //% block="%magnitud on %puerto"
+    //% block="$magnitud on $puerto"
     //% magnitud.defl=BeatMagnitudDHT.Temperatura
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Numeric inputs"
@@ -371,7 +377,7 @@ namespace beatMundial {
     /**
      * Reads light intensity on the selected port.
      */
-    //% block="LIGHT on %puerto"
+    //% block="LIGHT on $puerto"
     //% puerto.defl=BeatPuertoAnalog.Puerto0
     //% group="Numeric inputs"
     //% color="#F28B3A"
@@ -383,7 +389,7 @@ namespace beatMundial {
     /**
      * Reads soil moisture on the selected port.
      */
-    //% block="SOIL MOISTURE on %puerto"
+    //% block="SOIL MOISTURE on $puerto"
     //% puerto.defl=BeatPuertoAnalog.Puerto0
     //% group="Numeric inputs"
     //% color="#F28B3A"
@@ -395,7 +401,7 @@ namespace beatMundial {
     /**
      * Reads a potentiometer on the selected port.
      */
-    //% block="POTENTIOMETER on %puerto"
+    //% block="POTENTIOMETER on $puerto"
     //% puerto.defl=BeatPuertoAnalog.Puerto0
     //% group="Numeric inputs"
     //% color="#F28B3A"
@@ -407,7 +413,7 @@ namespace beatMundial {
     /**
      * Reads the joystick X or Y axis on Port 1. Returns 0-1023 (center ~512).
      */
-    //% block="JOYSTICK %eje on %puerto"
+    //% block="JOYSTICK $eje on $puerto"
     //% eje.defl=BeatJoystickEje.EjeX
     //% puerto.defl=BeatPuertoUno.Puerto1
     //% group="Numeric inputs"
@@ -421,7 +427,7 @@ namespace beatMundial {
     /**
      * Reads the R, G or B level from the TCS34725 color sensor.
      */
-    //% block="COLOR level %canal on %puerto"
+    //% block="COLOR level $canal on $puerto"
     //% canal.defl=BeatColorCanal.Rojo
     //% puerto.defl=BeatPuertoI2C.IIC
     //% group="Numeric inputs"
@@ -447,7 +453,7 @@ namespace beatMundial {
      * Warning: Port 2 uses P11 and Port 3 uses P5, shared with the
      * micro:bit's B and A buttons.
      */
-    //% block="%accion LED on %puerto"
+    //% block="$accion LED on $puerto"
     //% accion.defl=BeatLedAccion.Prender
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Outputs"
@@ -460,7 +466,7 @@ namespace beatMundial {
     /**
      * Shows a color on the RGB LEDs marked in the grid (LEDs 0 to 5).
      */
-    //% block="show RGB COLOR %tono on %puerto"
+    //% block="show RGB COLOR $tono on $puerto"
     //% tono.shadow="colorNumberPicker"
     //% puerto.defl=BeatPuerto.Puerto0
     //% gridLiteral=1
@@ -477,7 +483,7 @@ namespace beatMundial {
     /**
      * Shows an R, G, B color on the RGB LEDs marked in the grid (LEDs 0 to 5).
      */
-    //% block="show RGB COLOR R %r G %g B %b on %puerto"
+    //% block="show RGB COLOR R $r G $g B $b on $puerto"
     //% r.min=0 r.max=255 r.defl=255
     //% g.min=0 g.max=255 g.defl=0
     //% b.min=0 b.max=255 b.defl=0
@@ -497,7 +503,7 @@ namespace beatMundial {
     /**
      * Turns off all the LEDs of the RGB strip.
      */
-    //% block="turn off RGB COLOR on %puerto"
+    //% block="turn off RGB COLOR on $puerto"
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Outputs"
     //% color="#D9591A"
@@ -512,7 +518,7 @@ namespace beatMundial {
      * Draws a pattern on the 8x8 matrix by picking the LEDs on the grid.
      */
     //% blockId=beatmundial_matriz_dibujar
-    //% block="draw on MATRIX on %puerto"
+    //% block="draw on MATRIX on $puerto"
     //% puerto.defl=BeatPuertoI2C.IIC
     //% gridLiteral=1
     //% imageLiteralColumns=8
@@ -536,7 +542,7 @@ namespace beatMundial {
      * Scrolls text from right to left across the 8x8 matrix.
      * Blocks execution until the scroll finishes.
      */
-    //% block="scroll on MATRIX %texto every %ms ms on %puerto"
+    //% block="scroll on MATRIX $texto every $ms ms on $puerto"
     //% texto.defl="abc"
     //% ms.min=20 ms.max=1000 ms.defl=200
     //% puerto.defl=BeatPuertoI2C.IIC
@@ -556,7 +562,7 @@ namespace beatMundial {
     /**
      * Turns off all the LEDs on the 8x8 matrix.
      */
-    //% block="clear MATRIX on %puerto"
+    //% block="clear MATRIX on $puerto"
     //% puerto.defl=BeatPuertoI2C.IIC
     //% group="Outputs"
     //% color="#D9591A"
@@ -570,7 +576,7 @@ namespace beatMundial {
     /**
      * Writes text on the LCD at position (x, y).
      */
-    //% block="write on LCD %texto at x %x y %y on %puerto"
+    //% block="write on LCD $texto at x $x y $y on $puerto"
     //% x.min=0 x.max=15 x.defl=0
     //% y.min=0 y.max=1 y.defl=0
     //% puerto.defl=BeatPuertoI2C.IIC
@@ -590,7 +596,7 @@ namespace beatMundial {
     /**
      * Clears the LCD screen.
      */
-    //% block="clear LCD on %puerto"
+    //% block="clear LCD on $puerto"
     //% puerto.defl=BeatPuertoI2C.IIC
     //% group="Outputs"
     //% color="#D9591A"
@@ -601,14 +607,15 @@ namespace beatMundial {
         basic.pause(2);
     }
 
+    // --- GRUPO: … MÁS ---
+
     /**
      * Disables the micro:bit's display (LED matrix).
      * Use it in "on start" to avoid interference with the line follower
      * and the joystick button (P10).
      */
     //% block="disable micro:bit DISPLAY"
-    //% advanced=true
-    //% group="Outputs"
+    //% group="More"
     //% color="#D9591A"
     //% weight=61
     export function deshabilitarMatriz(): void {
@@ -619,8 +626,7 @@ namespace beatMundial {
      * Enables the micro:bit's display (LED matrix).
      */
     //% block="enable micro:bit DISPLAY"
-    //% advanced=true
-    //% group="Outputs"
+    //% group="More"
     //% color="#D9591A"
     //% weight=60
     export function habilitarMatriz(): void {
@@ -632,7 +638,7 @@ namespace beatMundial {
     /**
      * Moves the robot in the given direction at medium speed (50%).
      */
-    //% block="move MOTOR %motor %direccion"
+    //% block="move MOTOR $motor $direccion"
     //% motor.defl=BeatMotor.Ambos
     //% group="Motors"
     //% color="#9E3E10"
@@ -644,7 +650,7 @@ namespace beatMundial {
     /**
      * Moves the robot controlling direction and speed (0 to 100).
      */
-    //% block="move MOTOR %motor %direccion at speed %velocidad"
+    //% block="move MOTOR $motor $direccion at speed $velocidad"
     //% motor.defl=BeatMotor.Ambos
     //% velocidad.min=0 velocidad.max=100 velocidad.defl=100
     //% group="Motors"
@@ -705,7 +711,7 @@ namespace beatMundial {
     /**
      * Stops the selected motors.
      */
-    //% block="stop MOTOR %motor"
+    //% block="stop MOTOR $motor"
     //% motor.defl=BeatMotor.Ambos
     //% group="Motors"
     //% color="#9E3E10"
@@ -724,7 +730,7 @@ namespace beatMundial {
     /**
      * Moves the servo on the selected port to the given angle.
      */
-    //% block="move SERVO to %grados° on %puerto"
+    //% block="move SERVO to $grados° on $puerto"
     //% grados.min=0 grados.max=180 grados.defl=90
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Motors"
@@ -740,7 +746,7 @@ namespace beatMundial {
     /**
      * Moves the servo smoothly to the given angle, one degree every ms milliseconds.
      */
-    //% block="move SERVO to %grados° smoothly every %ms ms on %puerto"
+    //% block="move SERVO to $grados° smoothly every $ms ms on $puerto"
     //% grados.min=0 grados.max=180 grados.defl=90
     //% ms.min=1 ms.defl=10
     //% puerto.defl=BeatPuerto.Puerto0
@@ -769,7 +775,7 @@ namespace beatMundial {
     /**
      * Controls the fan. Pins: P2 and P1.
      */
-    //% block="%accion FAN on %puerto"
+    //% block="$accion FAN on $puerto"
     //% accion.defl=BeatFanAccion.Parar
     //% puerto.defl=BeatPuertoUno.Puerto1
     //% group="Motors"
