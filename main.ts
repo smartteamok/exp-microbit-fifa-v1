@@ -3,11 +3,11 @@
  */
 
 enum BeatMotor {
-    //% block="Both"
+    //% block="both"
     Ambos = 0,
-    //% block="Left motor"
+    //% block="left"
     Izquierdo = 1,
-    //% block="Right motor"
+    //% block="right"
     Derecho = 2
 }
 
@@ -51,25 +51,7 @@ enum BeatPuertoAnalog {
     Puerto1 = 1
 }
 
-enum BeatFanAccion {
-    //% block="Stop"
-    Parar = 2,
-    //% block="Turn left"
-    Izquierda = 0,
-    //% block="Turn right"
-    Derecha = 1
-}
-
-enum BeatJoystickEje {
-    //% block="X axis"
-    EjeX = 0,
-    //% block="Y axis"
-    EjeY = 1,
-    //% block="button"
-    Pulsador = 2
-}
-
-enum BeatPuertoJoystick {
+enum BeatPuertoUno {
     //% block="Port 1"
     Puerto1 = 1
 }
@@ -77,6 +59,22 @@ enum BeatPuertoJoystick {
 enum BeatPuertoI2C {
     //% block="IIC"
     IIC = 0
+}
+
+enum BeatFanAccion {
+    //% block="stop"
+    Parar = 2,
+    //% block="turn left"
+    Izquierda = 0,
+    //% block="turn right"
+    Derecha = 1
+}
+
+enum BeatJoystickEje {
+    //% block="X axis"
+    EjeX = 0,
+    //% block="Y axis"
+    EjeY = 1
 }
 
 enum BeatColorCanal {
@@ -98,69 +96,533 @@ enum BeatColorDetectado {
 }
 
 enum BeatLedAccion {
-    //% block="Turn on"
+    //% block="turn on"
     Prender = 1,
-    //% block="Turn off"
+    //% block="turn off"
     Apagar = 0
 }
 
-enum BeatLedIndex {
-    //% block="0"
-    Led0 = 0,
-    //% block="1"
-    Led1 = 1,
-    //% block="2"
-    Led2 = 2,
-    //% block="3"
-    Led3 = 3,
-    //% block="4"
-    Led4 = 4,
-    //% block="5"
-    Led5 = 5
+enum BeatMagnitudDHT {
+    //% block="TEMPERATURE (°C)"
+    Temperatura = 0,
+    //% block="HUMIDITY (％)"
+    Humedad = 1
 }
 
-enum BeatLedSeleccion {
-    //% block="all"
-    Todos = -1,
-    //% block="0"
-    Led0 = 0,
-    //% block="1"
-    Led1 = 1,
-    //% block="2"
-    Led2 = 2,
-    //% block="3"
-    Led3 = 3,
-    //% block="4"
-    Led4 = 4,
-    //% block="5"
-    Led5 = 5
-}
-
-//% color="#ed6a22" weight=200 icon="" block="FIFA Foundation"
-//% groups='["Setup","Digital sensors","Analog sensors","Outputs","Motors","Displays"]'
+//% color="#ed6a22" weight=200 icon="" block="FIFA Foundation"
+//% groups='["Events","Logic inputs","Numeric inputs","Outputs","Motors"]'
 namespace beatMundial {
 
-    // --- GRUPO: CONFIGURACIÓN ---
+    // Colores por función:
+    //   claro  #F28B3A -> eventos y entradas (sensores)
+    //   medio  #D9591A -> salidas (pantallas y LEDs)
+    //   oscuro #9E3E10 -> motores
+    // MakeCode exige el valor literal en cada anotación //% color.
+
+    // --- GRUPO: EVENTOS ---
 
     /**
-     * Disables the micro:bit's LED matrix.
-     * Use it in "on start" to avoid interference with the line sensor (P10).
+     * Runs the code inside when the button on the port is pressed.
      */
-    //% block="Disable LED matrix"
-    //% group="Setup"
-    //% color="#00A54F"
+    //% block="on BUTTON pressed on %puerto"
+    //% puerto.defl=BeatPuerto.Puerto0
+    //% group="Events"
+    //% color="#F28B3A"
     //% weight=100
+    export function alPulsarBoton(puerto: BeatPuerto, handler: () => void): void {
+        vigilar(() => leerPulsador(puerto), handler);
+    }
+
+    /**
+     * Runs the code inside when the touch sensor on the port is touched.
+     */
+    //% block="on TOUCH on %puerto"
+    //% puerto.defl=BeatPuerto.Puerto0
+    //% group="Events"
+    //% color="#F28B3A"
+    //% weight=99
+    export function alTocarTactil(puerto: BeatPuerto, handler: () => void): void {
+        vigilar(() => leerBotonTactil(puerto), handler);
+    }
+
+    /**
+     * Runs the code inside when the obstacle sensor detects something.
+     */
+    //% block="on OBSTACLE on %puerto"
+    //% puerto.defl=BeatPuerto.Puerto0
+    //% group="Events"
+    //% color="#F28B3A"
+    //% weight=98
+    export function alDetectarObstaculo(puerto: BeatPuerto, handler: () => void): void {
+        vigilar(() => hayObstaculo(puerto), handler);
+    }
+
+    /**
+     * Runs the code inside when the ultrasonic sensor measures less than
+     * the given distance (cm).
+     */
+    //% block="if DISTANCE is less than %distancia cm on %puerto"
+    //% distancia.min=2 distancia.max=400 distancia.defl=20
+    //% puerto.defl=BeatPuertoUno.Puerto1
+    //% group="Events"
+    //% color="#F28B3A"
+    //% weight=97
+    export function alDetectarUltrasonido(distancia: number, puerto: BeatPuertoUno, handler: () => void): void {
+        vigilar(() => {
+            const d = leerDistancia(puerto);
+            return d > 0 && d < distancia;
+        }, handler);
+    }
+
+    /**
+     * Runs the code inside when the color sensor detects the selected color.
+     */
+    //% block="on COLOR %tono detected on %puerto"
+    //% tono.defl=BeatColorDetectado.Rojo
+    //% puerto.defl=BeatPuertoI2C.IIC
+    //% group="Events"
+    //% color="#F28B3A"
+    //% weight=96
+    export function alDetectarColor(tono: BeatColorDetectado, puerto: BeatPuertoI2C, handler: () => void): void {
+        vigilar(() => colorDetectado(tono, puerto), handler);
+    }
+
+    /**
+     * Runs the code inside when the joystick axis moves away from the center.
+     */
+    //% block="on JOYSTICK %eje change on %puerto"
+    //% eje.defl=BeatJoystickEje.EjeX
+    //% puerto.defl=BeatPuertoUno.Puerto1
+    //% group="Events"
+    //% color="#F28B3A"
+    //% weight=95
+    export function alMoverJoystick(eje: BeatJoystickEje, puerto: BeatPuertoUno, handler: () => void): void {
+        vigilar(() => Math.abs(leerJoystick(eje, puerto) - JOYSTICK_CENTRO) > JOYSTICK_ZONA_MUERTA, handler);
+    }
+
+    /**
+     * Runs the code inside when the line follower reaches the selected position.
+     */
+    //% block="on LINE %posicion on %puerto"
+    //% posicion.defl=BeatPosicionLinea.Centro
+    //% puerto.defl=BeatPuertoUno.Puerto1
+    //% group="Events"
+    //% color="#F28B3A"
+    //% weight=94
+    export function alSeguirLinea(posicion: BeatPosicionLinea, puerto: BeatPuertoUno, handler: () => void): void {
+        vigilar(() => siguelineas(posicion, puerto), handler);
+    }
+
+    // --- GRUPO: ENTRADAS LÓGICAS ---
+
+    /**
+     * Reads the state of a digital push button.
+     */
+    //% block="BUTTON pressed on %puerto"
+    //% puerto.defl=BeatPuerto.Puerto0
+    //% group="Logic inputs"
+    //% color="#F28B3A"
+    //% weight=90
+    export function leerPulsador(puerto: BeatPuerto): boolean {
+        return pins.digitalReadPin(getDigitalPin(puerto)) == 0;
+    }
+
+    /**
+     * Reads the state of a digital touch sensor.
+     */
+    //% block="TOUCH detected on %puerto"
+    //% puerto.defl=BeatPuerto.Puerto0
+    //% group="Logic inputs"
+    //% color="#F28B3A"
+    //% weight=89
+    export function leerBotonTactil(puerto: BeatPuerto): boolean {
+        return pins.digitalReadPin(getDigitalPin(puerto)) == 1;
+    }
+
+    /**
+     * Returns true while the joystick button is pressed.
+     */
+    //% block="JOYSTICK pressed on %puerto"
+    //% puerto.defl=BeatPuertoUno.Puerto1
+    //% group="Logic inputs"
+    //% color="#F28B3A"
+    //% weight=88
+    export function joystickPulsado(puerto: BeatPuertoUno): boolean {
+        pins.setPull(DigitalPin.P10, PinPullMode.PullUp);
+        return pins.digitalReadPin(DigitalPin.P10) == 0;
+    }
+
+    /**
+     * Checks the line position.
+     * Pins: P10 left, P1 center, P2 right.
+     */
+    //% block="LINE %posicion on %puerto"
+    //% puerto.defl=BeatPuertoUno.Puerto1
+    //% group="Logic inputs"
+    //% color="#F28B3A"
+    //% weight=87
+    export function siguelineas(posicion: BeatPosicionLinea, puerto: BeatPuertoUno): boolean {
+        let valIzq = pins.analogReadPin(AnalogPin.P10);
+        let valCen = pins.analogReadPin(AnalogPin.P1);
+        let valDer = pins.analogReadPin(AnalogPin.P2);
+
+        const UMBRAL = 30;
+
+        switch (posicion) {
+            case BeatPosicionLinea.Izquierda:
+                return (valIzq <= UMBRAL && valDer > UMBRAL && valCen > UMBRAL);
+
+            case BeatPosicionLinea.Centro:
+                return (valCen <= UMBRAL && valIzq > UMBRAL && valDer > UMBRAL);
+
+            case BeatPosicionLinea.Derecha:
+                return (valDer <= UMBRAL && valIzq > UMBRAL && valCen > UMBRAL);
+
+            case BeatPosicionLinea.Ninguna:
+                return (valDer > UMBRAL && valIzq > UMBRAL && valCen > UMBRAL);
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if the dominant color matches the selection.
+     */
+    //% block="COLOR %tonoBuscado detected on %puerto"
+    //% tonoBuscado.defl=BeatColorDetectado.Rojo
+    //% puerto.defl=BeatPuertoI2C.IIC
+    //% group="Logic inputs"
+    //% color="#F28B3A"
+    //% weight=86
+    export function colorDetectado(tonoBuscado: BeatColorDetectado, puerto: BeatPuertoI2C): boolean {
+        const rgb = tcs34725ReadRgb();
+        const r = tcs34725ToAnalog(rgb[0]);
+        const g = tcs34725ToAnalog(rgb[1]);
+        const b = tcs34725ToAnalog(rgb[2]);
+        const min = 100;
+        let detected = false;
+        switch (tonoBuscado) {
+            case BeatColorDetectado.Rojo:
+                detected = r > min && r > g && r > b;
+                break;
+            case BeatColorDetectado.Verde:
+                detected = g > min && g > r && g > b;
+                break;
+            default:
+                detected = b > min && b > r && b > g;
+                break;
+        }
+        return detected;
+    }
+
+    /**
+     * Returns true when the obstacle sensor detects something.
+     * The sensor outputs 0 when there is an obstacle and 1 when there is none.
+     */
+    //% block="OBSTACLE detected on %puerto"
+    //% puerto.defl=BeatPuerto.Puerto0
+    //% group="Logic inputs"
+    //% color="#F28B3A"
+    //% weight=85
+    export function hayObstaculo(puerto: BeatPuerto): boolean {
+        return pins.digitalReadPin(getDigitalPin(puerto)) == 0;
+    }
+
+    // --- GRUPO: ENTRADAS NUMÉRICAS ---
+
+    /**
+     * Reads the distance in cm using the ultrasonic sensor.
+     * Pins: P2 trigger, P1 echo. Returns an integer of cm and 0 if
+     * there is no echo.
+     */
+    //% block="DISTANCE (cm) on %puerto"
+    //% puerto.defl=BeatPuertoUno.Puerto1
+    //% group="Numeric inputs"
+    //% color="#F28B3A"
+    //% weight=80
+    export function leerDistancia(puerto: BeatPuertoUno): number {
+        pins.digitalWritePin(DigitalPin.P2, 0);
+        control.waitMicros(2);
+        pins.digitalWritePin(DigitalPin.P2, 1);
+        control.waitMicros(10);
+        pins.digitalWritePin(DigitalPin.P2, 0);
+
+        let d = pins.pulseIn(DigitalPin.P1, PulseValue.High, 25000);
+        if (d == 0) return 0;
+
+        return Math.floor(d / 58);
+    }
+
+    /**
+     * Reads temperature (°C) or humidity (%) from the DHT11.
+     * Returns an integer, or -1 if the reading fails.
+     */
+    //% block="%magnitud on %puerto"
+    //% magnitud.defl=BeatMagnitudDHT.Temperatura
+    //% puerto.defl=BeatPuerto.Puerto0
+    //% group="Numeric inputs"
+    //% color="#F28B3A"
+    //% weight=79
+    export function leerDHT11(magnitud: BeatMagnitudDHT, puerto: BeatPuerto): number {
+        const data = dht11Read(getDigitalPin(puerto));
+        if (data.length < 5) return -1;
+        return magnitud == BeatMagnitudDHT.Humedad ? data[0] : data[2];
+    }
+
+    /**
+     * Reads light intensity on the selected port.
+     */
+    //% block="LIGHT on %puerto"
+    //% puerto.defl=BeatPuertoAnalog.Puerto0
+    //% group="Numeric inputs"
+    //% color="#F28B3A"
+    //% weight=78
+    export function leerLuz(puerto: BeatPuertoAnalog): number {
+        return pins.analogReadPin(getAnalogPin(puerto));
+    }
+
+    /**
+     * Reads soil moisture on the selected port.
+     */
+    //% block="SOIL MOISTURE on %puerto"
+    //% puerto.defl=BeatPuertoAnalog.Puerto0
+    //% group="Numeric inputs"
+    //% color="#F28B3A"
+    //% weight=77
+    export function leerHumedadSuelo(puerto: BeatPuertoAnalog): number {
+        return pins.analogReadPin(getAnalogPin(puerto));
+    }
+
+    /**
+     * Reads a potentiometer on the selected port.
+     */
+    //% block="POTENTIOMETER on %puerto"
+    //% puerto.defl=BeatPuertoAnalog.Puerto0
+    //% group="Numeric inputs"
+    //% color="#F28B3A"
+    //% weight=76
+    export function leerPotenciometro(puerto: BeatPuertoAnalog): number {
+        return pins.analogReadPin(getAnalogPin(puerto));
+    }
+
+    /**
+     * Reads the joystick X or Y axis on Port 1. Returns 0-1023 (center ~512).
+     */
+    //% block="JOYSTICK %eje on %puerto"
+    //% eje.defl=BeatJoystickEje.EjeX
+    //% puerto.defl=BeatPuertoUno.Puerto1
+    //% group="Numeric inputs"
+    //% color="#F28B3A"
+    //% weight=75
+    export function leerJoystick(eje: BeatJoystickEje, puerto: BeatPuertoUno): number {
+        if (eje == BeatJoystickEje.EjeY) return pins.analogReadPin(AnalogPin.P2);
+        return pins.analogReadPin(AnalogPin.P1);
+    }
+
+    /**
+     * Reads the R, G or B level from the TCS34725 color sensor.
+     */
+    //% block="COLOR level %canal on %puerto"
+    //% canal.defl=BeatColorCanal.Rojo
+    //% puerto.defl=BeatPuertoI2C.IIC
+    //% group="Numeric inputs"
+    //% color="#F28B3A"
+    //% weight=74
+    export function leerNivelColor(canal: BeatColorCanal, puerto: BeatPuertoI2C): number {
+        const rgb = tcs34725ReadRgb();
+        switch (canal) {
+            case BeatColorCanal.Rojo:
+                return tcs34725ToAnalog(rgb[0]);
+            case BeatColorCanal.Verde:
+                return tcs34725ToAnalog(rgb[1]);
+            default:
+                return tcs34725ToAnalog(rgb[2]);
+        }
+    }
+
+    // --- GRUPO: SALIDAS ---
+
+    /**
+     * Turns an LED connected to the given port on or off.
+     * Writes a high (1) or low (0) level to the port's digital pin.
+     * Warning: Port 2 uses P11 and Port 3 uses P5, shared with the
+     * micro:bit's B and A buttons.
+     */
+    //% block="%accion LED on %puerto"
+    //% accion.defl=BeatLedAccion.Prender
+    //% puerto.defl=BeatPuerto.Puerto0
+    //% group="Outputs"
+    //% color="#D9591A"
+    //% weight=70
+    export function ledSimple(accion: BeatLedAccion, puerto: BeatPuerto): void {
+        pins.digitalWritePin(getDigitalPin(puerto), <number>accion);
+    }
+
+    /**
+     * Shows a color on the RGB LEDs marked in the grid (LEDs 0 to 5).
+     */
+    //% block="show RGB COLOR %tono on %puerto"
+    //% tono.shadow="colorNumberPicker"
+    //% puerto.defl=BeatPuerto.Puerto0
+    //% gridLiteral=1
+    //% imageLiteralColumns=6
+    //% imageLiteralRows=1
+    //% inlineInputMode=inline
+    //% group="Outputs"
+    //% color="#D9591A"
+    //% weight=69
+    export function tiraRgbColor(leds: string, tono: number, puerto: BeatPuerto): void {
+        tiraRgbPintar(leds, tono, puerto);
+    }
+
+    /**
+     * Shows an R, G, B color on the RGB LEDs marked in the grid (LEDs 0 to 5).
+     */
+    //% block="show RGB COLOR R %r G %g B %b on %puerto"
+    //% r.min=0 r.max=255 r.defl=255
+    //% g.min=0 g.max=255 g.defl=0
+    //% b.min=0 b.max=255 b.defl=0
+    //% puerto.defl=BeatPuerto.Puerto0
+    //% gridLiteral=1
+    //% imageLiteralColumns=6
+    //% imageLiteralRows=1
+    //% inlineInputMode=inline
+    //% group="Outputs"
+    //% color="#D9591A"
+    //% weight=68
+    export function tiraRgbLed(leds: string, r: number, g: number, b: number, puerto: BeatPuerto): void {
+        const tono = (clamp(r, 0, 255) << 16) | (clamp(g, 0, 255) << 8) | clamp(b, 0, 255);
+        tiraRgbPintar(leds, tono, puerto);
+    }
+
+    /**
+     * Turns off all the LEDs of the RGB strip.
+     */
+    //% block="turn off RGB COLOR on %puerto"
+    //% puerto.defl=BeatPuerto.Puerto0
+    //% group="Outputs"
+    //% color="#D9591A"
+    //% weight=67
+    export function tiraRgbApagar(puerto: BeatPuerto): void {
+        const buf = tiraRgbBuffer(puerto);
+        buf.fill(0);
+        tiraRgbMostrar(buf, puerto);
+    }
+
+    /**
+     * Draws a pattern on the 8x8 matrix by picking the LEDs on the grid.
+     */
+    //% blockId=beatmundial_matriz_dibujar
+    //% block="draw on MATRIX on %puerto"
+    //% puerto.defl=BeatPuertoI2C.IIC
+    //% gridLiteral=1
+    //% imageLiteralColumns=8
+    //% imageLiteralRows=8
+    //% imageLiteralScale=0.8
+    //% inlineInputMode=external
+    //% group="Outputs"
+    //% color="#D9591A"
+    //% weight=66
+    export function matrizDibujar(dibujo: string, puerto: BeatPuertoI2C): void {
+        matrizInit();
+        const celdas = celdasMarcadas(dibujo, 64);
+        const cols = [0, 0, 0, 0, 0, 0, 0, 0];
+        for (let i = 0; i < 64; i++) {
+            if (celdas[i]) cols[i % 8] |= (1 << (i >> 3));
+        }
+        matrizDibujarVentana(cols, 0);
+    }
+
+    /**
+     * Scrolls text from right to left across the 8x8 matrix.
+     * Blocks execution until the scroll finishes.
+     */
+    //% block="scroll on MATRIX %texto every %ms ms on %puerto"
+    //% texto.defl="abc"
+    //% ms.min=20 ms.max=1000 ms.defl=200
+    //% puerto.defl=BeatPuertoI2C.IIC
+    //% group="Outputs"
+    //% color="#D9591A"
+    //% weight=65
+    export function matrizDesplazar(texto: string, ms: number, puerto: BeatPuertoI2C): void {
+        matrizInit();
+        const cols = matrizColumnasTexto(texto);
+        const espera = clamp(ms, 20, 1000);
+        for (let offset = -8; offset <= cols.length; offset++) {
+            matrizDibujarVentana(cols, offset);
+            basic.pause(espera);
+        }
+    }
+
+    /**
+     * Turns off all the LEDs on the 8x8 matrix.
+     */
+    //% block="clear MATRIX on %puerto"
+    //% puerto.defl=BeatPuertoI2C.IIC
+    //% group="Outputs"
+    //% color="#D9591A"
+    //% weight=64
+    export function matrizBorrar(puerto: BeatPuertoI2C): void {
+        matrizInit();
+        for (let f = 0; f < 8; f++) matrizBuffer[f] = 0;
+        matrizVolcar();
+    }
+
+    /**
+     * Writes text on the LCD at position (x, y).
+     */
+    //% block="write on LCD %texto at x %x y %y on %puerto"
+    //% x.min=0 x.max=15 x.defl=0
+    //% y.min=0 y.max=1 y.defl=0
+    //% puerto.defl=BeatPuertoI2C.IIC
+    //% inlineInputMode=inline
+    //% group="Outputs"
+    //% color="#D9591A"
+    //% weight=63
+    export function lcdMostrar(texto: string, x: number, y: number, puerto: BeatPuertoI2C): void {
+        lcdEnsureInit();
+        lcdSetCursor(x, y);
+        const limit = 16;
+        for (let i = 0; i < texto.length && i < limit; i++) {
+            lcdData(texto.charCodeAt(i));
+        }
+    }
+
+    /**
+     * Clears the LCD screen.
+     */
+    //% block="clear LCD on %puerto"
+    //% puerto.defl=BeatPuertoI2C.IIC
+    //% group="Outputs"
+    //% color="#D9591A"
+    //% weight=62
+    export function lcdBorrar(puerto: BeatPuertoI2C): void {
+        lcdEnsureInit();
+        lcdCommand(0x01);
+        basic.pause(2);
+    }
+
+    /**
+     * Disables the micro:bit's display (LED matrix).
+     * Use it in "on start" to avoid interference with the line follower
+     * and the joystick button (P10).
+     */
+    //% block="disable micro:bit DISPLAY"
+    //% advanced=true
+    //% group="Outputs"
+    //% color="#D9591A"
+    //% weight=61
     export function deshabilitarMatriz(): void {
         led.enable(false);
     }
 
     /**
-     * Enables the micro:bit's LED matrix.
+     * Enables the micro:bit's display (LED matrix).
      */
-    //% block="Enable LED matrix"
-    //% group="Setup"
-    //% color="#00A54F"
-    //% weight=99
+    //% block="enable micro:bit DISPLAY"
+    //% advanced=true
+    //% group="Outputs"
+    //% color="#D9591A"
+    //% weight=60
     export function habilitarMatriz(): void {
         led.enable(true);
     }
@@ -170,11 +632,11 @@ namespace beatMundial {
     /**
      * Moves the robot in the given direction at medium speed (50%).
      */
-    //% block="Move ｜ %direccion %motor"
+    //% block="move MOTOR %motor %direccion"
     //% motor.defl=BeatMotor.Ambos
     //% group="Motors"
-    //% color="#221E1F"
-    //% weight=90
+    //% color="#9E3E10"
+    //% weight=50
     export function mover(direccion: BeatDireccion, motor: BeatMotor): void {
         moverVelocidad(direccion, motor, 50);
     }
@@ -182,12 +644,12 @@ namespace beatMundial {
     /**
      * Moves the robot controlling direction and speed (0 to 100).
      */
-    //% block="Move ｜ %direccion %motor at speed %velocidad"
+    //% block="move MOTOR %motor %direccion at speed %velocidad"
     //% motor.defl=BeatMotor.Ambos
     //% velocidad.min=0 velocidad.max=100 velocidad.defl=100
     //% group="Motors"
-    //% color="#221E1F"
-    //% weight=85
+    //% color="#9E3E10"
+    //% weight=49
     export function moverVelocidad(direccion: BeatDireccion, motor: BeatMotor, velocidad: number): void {
         let pwm = pins.map(velocidad, 0, 100, 0, 1023);
         if (pwm < 0) pwm = 0;
@@ -243,10 +705,11 @@ namespace beatMundial {
     /**
      * Stops the selected motors.
      */
-    //% block="Stop ｜ %motor"
+    //% block="stop MOTOR %motor"
+    //% motor.defl=BeatMotor.Ambos
     //% group="Motors"
-    //% color="#221E1F"
-    //% weight=80
+    //% color="#9E3E10"
+    //% weight=48
     export function parar(motor: BeatMotor): void {
         // Apagar Izquierdo (P14 PWM)
         if (motor === BeatMotor.Ambos || motor === BeatMotor.Izquierdo) {
@@ -258,102 +721,16 @@ namespace beatMundial {
         }
     }
 
-    // --- GRUPO: ENTRADAS DIGITALES ---
-
     /**
-     * Checks the line position.
-     * Fixed pins: P10 left, P1 center, P2 right.
-     * The port selector has no effect yet.
+     * Moves the servo on the selected port to the given angle.
      */
-    //% block="Line follower ｜ %posicion on %puerto"
-    //% group="Digital sensors"
-    //% color="#979592"
-    //% weight=50
-    export function siguelineas(posicion: BeatPosicionLinea, puerto: BeatPuerto): boolean {
-        // Pines fijos para el conector 1
-        let valIzq = pins.analogReadPin(AnalogPin.P10);
-        let valCen = pins.analogReadPin(AnalogPin.P1);
-        let valDer = pins.analogReadPin(AnalogPin.P2);
-
-        const UMBRAL = 30;
-
-        switch (posicion) {
-            case BeatPosicionLinea.Izquierda:
-                return (valIzq <= UMBRAL && valDer > UMBRAL && valCen > UMBRAL);
-
-            case BeatPosicionLinea.Centro:
-                return (valCen <= UMBRAL && valIzq > UMBRAL && valDer > UMBRAL);
-
-            case BeatPosicionLinea.Derecha:
-                return (valDer <= UMBRAL && valIzq > UMBRAL && valCen > UMBRAL);
-
-            case BeatPosicionLinea.Ninguna:
-                return (valDer > UMBRAL && valIzq > UMBRAL && valCen > UMBRAL);
-        }
-        return false;
-    }
-
-    /**
-     * Reads the distance in cm using the ultrasonic sensor.
-     * Fixed pins: P2 trigger, P1 echo. Returns an integer of cm and 0 if
-     * there is no echo. The port selector has no effect yet.
-     */
-    //% block="Ultrasonic ｜ Distance (cm) on %puerto"
-    //% group="Digital sensors"
-    //% color="#CC1F26"
-    //% weight=58
-    export function leerDistancia(puerto: BeatPuerto): number {
-        // Pines fijos para el conector 1 (Ultrasonido)
-        pins.digitalWritePin(DigitalPin.P2, 0);
-        control.waitMicros(2);
-        pins.digitalWritePin(DigitalPin.P2, 1);
-        control.waitMicros(10);
-        pins.digitalWritePin(DigitalPin.P2, 0);
-
-        let d = pins.pulseIn(DigitalPin.P1, PulseValue.High, 25000);
-        if (d == 0) return 0;
-
-        return Math.floor(d / 58);
-    }
-
-    // --- GRUPO: MOTORES ---
-
-    /**
-     * Controls the fan. Fixed pins: P2 and P1.
-     * The port selector has no effect yet.
-     */
-    //% block="Fan ｜ %accion on %puerto"
-    //% accion.defl=BeatFanAccion.Parar
-    //% group="Motors"
-    //% color="#CC1F26"
-    //% weight=95
-    export function ventilador(accion: BeatFanAccion, puerto: BeatPuerto): void {
-        switch (accion) {
-            case BeatFanAccion.Izquierda:
-                pins.digitalWritePin(DigitalPin.P2, 1);
-                pins.digitalWritePin(DigitalPin.P1, 0);
-                break;
-            case BeatFanAccion.Derecha:
-                pins.digitalWritePin(DigitalPin.P2, 0);
-                pins.digitalWritePin(DigitalPin.P1, 1);
-                break;
-            default:
-                pins.digitalWritePin(DigitalPin.P2, 0);
-                pins.digitalWritePin(DigitalPin.P1, 0);
-                break;
-        }
-    }
-
-    /**
-     * Positions a servo on the selected port.
-     */
-    //% block="Servo ｜ %grados ° on %puerto"
+    //% block="move SERVO to %grados° on %puerto"
     //% grados.min=0 grados.max=180 grados.defl=90
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Motors"
-    //% color="#4F98CE"
-    //% weight=75
-    export function servoPosicionar(puerto: BeatPuerto, grados: number): void {
+    //% color="#9E3E10"
+    //% weight=47
+    export function servoPosicionar(grados: number, puerto: BeatPuerto): void {
         const pin = getServoPin(puerto);
         const clamped = clampServoAngle(grados);
         pins.servoWritePin(pin, clamped);
@@ -361,16 +738,16 @@ namespace beatMundial {
     }
 
     /**
-     * Moves the servo smoothly to the desired angle.
+     * Moves the servo smoothly to the given angle, one degree every ms milliseconds.
      */
-    //% block="Servo ｜ %grados ° smoothly every %ms ms on %puerto"
+    //% block="move SERVO to %grados° smoothly every %ms ms on %puerto"
     //% grados.min=0 grados.max=180 grados.defl=90
     //% ms.min=1 ms.defl=10
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Motors"
-    //% color="#4F98CE"
-    //% weight=70
-    export function servoMoverGradual(puerto: BeatPuerto, grados: number, ms: number): void {
+    //% color="#9E3E10"
+    //% weight=46
+    export function servoMoverGradual(grados: number, ms: number, puerto: BeatPuerto): void {
         const pin = getServoPin(puerto);
         const target = clampServoAngle(grados);
         const index = puertoIndex(puerto);
@@ -389,339 +766,30 @@ namespace beatMundial {
         servoPosiciones[index] = target;
     }
 
-    // --- GRUPO: SENSORES ---
-
     /**
-     * Reads soil moisture on the selected port.
+     * Controls the fan. Pins: P2 and P1.
      */
-    //% block="Soil moisture ｜ on %puerto"
-    //% puerto.defl=BeatPuertoAnalog.Puerto0
-    //% group="Analog sensors"
-    //% color="#DA418A"
-    //% weight=70
-    export function leerHumedadSuelo(puerto: BeatPuertoAnalog): number {
-        return pins.analogReadPin(getAnalogPin(puerto));
-    }
-
-    /**
-     * Reads light intensity on the selected port.
-     */
-    //% block="Light sensor ｜ on %puerto"
-    //% puerto.defl=BeatPuertoAnalog.Puerto0
-    //% group="Analog sensors"
-    //% color="#DA418A"
-    //% weight=68
-    export function leerLuz(puerto: BeatPuertoAnalog): number {
-        return pins.analogReadPin(getAnalogPin(puerto));
-    }
-
-    /**
-     * Reads a potentiometer on the selected port.
-     */
-    //% block="Potentiometer ｜ on %puerto"
-    //% puerto.defl=BeatPuertoAnalog.Puerto0
-    //% group="Analog sensors"
-    //% color="#DA418A"
-    //% weight=66
-    export function leerPotenciometro(puerto: BeatPuertoAnalog): number {
-        return pins.analogReadPin(getAnalogPin(puerto));
-    }
-
-    /**
-     * Reads the R, G or B level from the TCS34725 color sensor.
-     */
-    //% block="Color sensor ｜ %canal level"
-    //% canal.defl=BeatColorCanal.Rojo
-    //% group="Analog sensors"
-    //% color="#89267F"
-    //% weight=65
-    export function leerNivelColor(canal: BeatColorCanal): number {
-        const rgb = tcs34725ReadRgb();
-        switch (canal) {
-            case BeatColorCanal.Rojo:
-                return tcs34725ToAnalog(rgb[0]);
-            case BeatColorCanal.Verde:
-                return tcs34725ToAnalog(rgb[1]);
-            default:
-                return tcs34725ToAnalog(rgb[2]);
-        }
-    }
-
-    /**
-     * Returns true if the dominant color matches the selection.
-     */
-    //% block="Color sensor ｜ detected color is %tonoBuscado"
-    //% tonoBuscado.defl=BeatColorDetectado.Rojo
-    //% group="Analog sensors"
-    //% color="#89267F"
-    //% weight=64
-    export function colorDetectado(tonoBuscado: BeatColorDetectado): boolean {
-        const rgb = tcs34725ReadRgb();
-        const r = tcs34725ToAnalog(rgb[0]);
-        const g = tcs34725ToAnalog(rgb[1]);
-        const b = tcs34725ToAnalog(rgb[2]);
-        const min = 100;
-        let detected = false;
-        switch (tonoBuscado) {
-            case BeatColorDetectado.Rojo:
-                detected = r > min && r > g && r > b;
+    //% block="%accion FAN on %puerto"
+    //% accion.defl=BeatFanAccion.Parar
+    //% puerto.defl=BeatPuertoUno.Puerto1
+    //% group="Motors"
+    //% color="#9E3E10"
+    //% weight=45
+    export function ventilador(accion: BeatFanAccion, puerto: BeatPuertoUno): void {
+        switch (accion) {
+            case BeatFanAccion.Izquierda:
+                pins.digitalWritePin(DigitalPin.P2, 1);
+                pins.digitalWritePin(DigitalPin.P1, 0);
                 break;
-            case BeatColorDetectado.Verde:
-                detected = g > min && g > r && g > b;
+            case BeatFanAccion.Derecha:
+                pins.digitalWritePin(DigitalPin.P2, 0);
+                pins.digitalWritePin(DigitalPin.P1, 1);
                 break;
             default:
-                detected = b > min && b > r && b > g;
+                pins.digitalWritePin(DigitalPin.P2, 0);
+                pins.digitalWritePin(DigitalPin.P1, 0);
                 break;
         }
-        return detected;
-    }
-
-    /**
-     * Reads the joystick on Port 1.
-     * X and Y axes return 0-1023, the button returns 0 or 1.
-     */
-    //% block="Joystick ｜ %eje on %puerto"
-    //% eje.defl=BeatJoystickEje.EjeX
-    //% puerto.defl=BeatPuertoJoystick.Puerto1
-    //% group="Analog sensors"
-    //% color="#979592"
-    //% weight=63
-    export function leerJoystick(eje: BeatJoystickEje, puerto: BeatPuertoJoystick): number {
-        switch (eje) {
-            case BeatJoystickEje.EjeX:
-                return pins.analogReadPin(AnalogPin.P1);
-            case BeatJoystickEje.EjeY:
-                return pins.analogReadPin(AnalogPin.P2);
-            default:
-                pins.setPull(DigitalPin.P10, PinPullMode.PullUp);
-                return pins.digitalReadPin(DigitalPin.P10) == 0 ? 1 : 0;
-        }
-    }
-
-    /**
-     * Reads the state of a digital touch button.
-     */
-    //% block="Touch ｜ on %puerto"
-    //% puerto.defl=BeatPuerto.Puerto0
-    //% group="Digital sensors"
-    //% color="#4F98CE"
-    //% weight=60
-    export function leerBotonTactil(puerto: BeatPuerto): boolean {
-        return pins.digitalReadPin(getDigitalPin(puerto)) == 1;
-    }
-
-    /**
-     * Reads the state of a digital push button.
-     */
-    //% block="Button ｜ on %puerto"
-    //% puerto.defl=BeatPuerto.Puerto0
-    //% group="Digital sensors"
-    //% color="#4F98CE"
-    //% weight=59
-    export function leerPulsador(puerto: BeatPuerto): boolean {
-        return pins.digitalReadPin(getDigitalPin(puerto)) == 0;
-    }
-
-    /**
-     * Reads temperature (°C) from the DHT11. Returns an integer.
-     * Returns -1 if the reading fails.
-     */
-    //% block="DTH11 ｜ Temperature (°C) on %puerto"
-    //% puerto.defl=BeatPuerto.Puerto0
-    //% group="Digital sensors"
-    //% color="#4F98CE"
-    //% weight=57
-    export function leerTemperaturaDHT11(puerto: BeatPuerto): number {
-        const data = dht11Read(getDigitalPin(puerto));
-        if (data.length < 5) return -1;
-        return data[2];
-    }
-
-    /**
-     * Reads humidity (%) from the DHT11. Returns an integer.
-     * Returns -1 if the reading fails.
-     */
-    //% block="DTH11 ｜ Humidity (％) on %puerto"
-    //% puerto.defl=BeatPuerto.Puerto0
-    //% group="Digital sensors"
-    //% color="#4F98CE"
-    //% weight=56
-    export function leerHumedadDHT11(puerto: BeatPuerto): number {
-        const data = dht11Read(getDigitalPin(puerto));
-        if (data.length < 5) return -1;
-        return data[0];
-    }
-
-    // --- GRUPO: PANTALLA ---
-
-    /**
-     * Clears the LCD screen.
-     */
-    //% block="LCD ｜ Clear screen"
-    //% group="Displays"
-    //% color="#89267F"
-    //% weight=48
-    export function lcdBorrar(): void {
-        lcdEnsureInit();
-        lcdCommand(0x01);
-        basic.pause(2);
-    }
-
-    /**
-     * Shows text at position (x, y).
-     */
-    //% block="LCD ｜ show %texto at x %x y %y"
-    //% x.min=0 x.max=15 x.defl=0
-    //% y.min=0 y.max=1 y.defl=0
-    //% group="Displays"
-    //% color="#89267F"
-    //% weight=46
-    export function lcdMostrar(texto: string, x: number, y: number): void {
-        lcdEnsureInit();
-        lcdSetCursor(x, y);
-        const limit = 16;
-        for (let i = 0; i < texto.length && i < limit; i++) {
-            lcdData(texto.charCodeAt(i));
-        }
-    }
-
-    /**
-     * Draws a pattern on the 8x8 matrix by picking the LEDs on the grid.
-     */
-    //% blockId=beatmundial_matriz_dibujar
-    //% block="Matrix ｜ Draw on I2C"
-    //% gridLiteral=1
-    //% imageLiteralColumns=8
-    //% imageLiteralRows=8
-    //% imageLiteralScale=0.8
-    //% inlineInputMode=external
-    //% group="Displays"
-    //% color="#89267F"
-    //% weight=44
-    export function matrizDibujar(dibujo: string, puerto?: BeatPuertoI2C): void {
-        matrizInit();
-        const cols = [0, 0, 0, 0, 0, 0, 0, 0];
-        let i = 0;
-        for (let p = 0; p < dibujo.length && i < 64; p++) {
-            // '#' 35, '*' 42, '1' 49 encendido; '.' 46, '0' 48, '_' 95 apagado.
-            // El resto (espacios, saltos de linea, tabulaciones) se ignora.
-            const c = dibujo.charCodeAt(p);
-            if (c == 35 || c == 42 || c == 49) {
-                cols[i % 8] |= (1 << (i >> 3));
-                i++;
-            } else if (c == 46 || c == 48 || c == 95) {
-                i++;
-            }
-        }
-        matrizDibujarVentana(cols, 0);
-    }
-
-    /**
-     * Scrolls text from right to left across the 8x8 matrix.
-     * Blocks execution until the scroll finishes.
-     */
-    //% block="Matrix ｜ Scroll %texto every %ms ms on %puerto"
-    //% texto.defl="abc"
-    //% ms.min=20 ms.max=1000 ms.defl=200
-    //% puerto.defl=BeatPuertoI2C.IIC
-    //% group="Displays"
-    //% color="#89267F"
-    //% weight=43
-    export function matrizDesplazar(texto: string, ms: number, puerto: BeatPuertoI2C): void {
-        matrizInit();
-        const cols = matrizColumnasTexto(texto);
-        const espera = clamp(ms, 20, 1000);
-        for (let offset = -8; offset <= cols.length; offset++) {
-            matrizDibujarVentana(cols, offset);
-            basic.pause(espera);
-        }
-    }
-
-    /**
-     * Turns off all the LEDs on the 8x8 matrix.
-     */
-    //% block="Matrix ｜ Clear on %puerto"
-    //% puerto.defl=BeatPuertoI2C.IIC
-    //% group="Displays"
-    //% color="#89267F"
-    //% weight=42
-    export function matrizBorrar(puerto: BeatPuertoI2C): void {
-        matrizInit();
-        for (let f = 0; f < 8; f++) matrizBuffer[f] = 0;
-        matrizVolcar();
-    }
-
-    // --- GRUPO: SALIDAS ---
-
-    /**
-     * Turns an LED connected to the given port on or off.
-     * Writes a high (1) or low (0) level to the port's digital pin.
-     * Warning: Port 2 uses P11 and Port 3 uses P5, shared with the
-     * micro:bit's B and A buttons.
-     */
-    //% block="LED ｜ %accion on %puerto"
-    //% accion.defl=BeatLedAccion.Prender
-    //% puerto.defl=BeatPuerto.Puerto0
-    //% group="Outputs"
-    //% color="#4F98CE"
-    //% weight=100
-    export function ledSimple(accion: BeatLedAccion, puerto: BeatPuerto): void {
-        pins.digitalWritePin(getDigitalPin(puerto), <number>accion);
-    }
-
-    /**
-     * Lights up the whole RGB strip or a single LED with a color.
-     */
-    //% block="RGB strip ｜ show color %tono on %led on %puerto"
-    //% tono.shadow="colorNumberPicker"
-    //% led.defl=BeatLedSeleccion.Todos
-    //% puerto.defl=BeatPuerto.Puerto0
-    //% group="Outputs"
-    //% color="#4F98CE"
-    //% weight=44
-    export function tiraRgbColor(tono: number, led: BeatLedSeleccion, puerto: BeatPuerto): void {
-        const buf = tiraRgbBuffer(puerto);
-        if (led === BeatLedSeleccion.Todos) {
-            for (let i = 0; i < TIRA_RGB_LEDS; i++) tiraRgbSetPixel(buf, i, tono);
-        } else {
-            tiraRgbSetPixel(buf, <number>led, tono);
-        }
-        tiraRgbMostrar(buf, puerto);
-    }
-
-    /**
-     * Sets the color of a single LED via R, G and B channels.
-     */
-    //% block="RGB strip ｜ LED %led R %r G %g B %b on %puerto"
-    //% led.defl=BeatLedIndex.Led0
-    //% r.min=0 r.max=255 r.defl=255
-    //% g.min=0 g.max=255 g.defl=0
-    //% b.min=0 b.max=255 b.defl=0
-    //% puerto.defl=BeatPuerto.Puerto0
-    //% inlineInputMode=inline
-    //% group="Outputs"
-    //% color="#4F98CE"
-    //% weight=42
-    export function tiraRgbLed(led: BeatLedIndex, r: number, g: number, b: number, puerto: BeatPuerto): void {
-        const buf = tiraRgbBuffer(puerto);
-        const index = clamp(<number>led, 0, TIRA_RGB_LEDS - 1);
-        const tono = (clamp(r, 0, 255) << 16) | (clamp(g, 0, 255) << 8) | clamp(b, 0, 255);
-        tiraRgbSetPixel(buf, index, tono);
-        tiraRgbMostrar(buf, puerto);
-    }
-
-    /**
-     * Turns off the RGB strip.
-     */
-    //% block="RGB strip ｜ Turn off on %puerto"
-    //% puerto.defl=BeatPuerto.Puerto0
-    //% group="Outputs"
-    //% color="#4F98CE"
-    //% weight=41
-    export function tiraRgbApagar(puerto: BeatPuerto): void {
-        const buf = tiraRgbBuffer(puerto);
-        buf.fill(0);
-        tiraRgbMostrar(buf, puerto);
     }
 
     // --- UTILIDADES INTERNAS ---
@@ -750,6 +818,70 @@ namespace beatMundial {
     const MATRIZ_ROTACION_COLUMNA = 0;  // ver nota de calibración
     let matrizInicializada = false;
     const matrizBuffer = [0, 0, 0, 0, 0, 0, 0, 0];
+    const JOYSTICK_CENTRO = 512;
+    const JOYSTICK_ZONA_MUERTA = 100;   // margen alrededor del centro para ignorar el temblor
+
+    // --- Eventos ---
+    // Un único ciclo en segundo plano revisa cada condición registrada y, cuando pasa
+    // de falsa a verdadera, levanta un evento en el bus de MakeCode. Así cada handler
+    // corre en su propio hilo y se encola si está ocupado, igual que los eventos nativos.
+
+    const FUENTE_EVENTOS = 0x7A01;      // ID de fuente propio para los eventos de la extensión
+    const EVENTOS_PERIODO_MS = 20;
+
+    class Vigilante {
+        leer: () => boolean;
+        previo: boolean;
+        valor: number;
+
+        constructor(leer: () => boolean, valor: number) {
+            this.leer = leer;
+            this.previo = false;
+            this.valor = valor;
+        }
+    }
+
+    const vigilantes: Vigilante[] = [];
+    let cicloEventosIniciado = false;
+
+    function vigilar(leer: () => boolean, handler: () => void): void {
+        // El valor 0 significa "cualquier evento" en el bus, por eso se empieza en 1.
+        const valor = vigilantes.length + 1;
+        vigilantes.push(new Vigilante(leer, valor));
+        control.onEvent(FUENTE_EVENTOS, valor, handler);
+        if (cicloEventosIniciado) return;
+        cicloEventosIniciado = true;
+        control.inBackground(() => {
+            while (true) {
+                for (let i = 0; i < vigilantes.length; i++) {
+                    const v = vigilantes[i];
+                    const ahora = v.leer();
+                    if (ahora && !v.previo) control.raiseEvent(FUENTE_EVENTOS, v.valor);
+                    v.previo = ahora;
+                }
+                basic.pause(EVENTOS_PERIODO_MS);
+            }
+        });
+    }
+
+    // --- Grillas (matriz 8x8 y tira RGB) ---
+
+    // Recorre el texto de una grilla y devuelve qué celdas están marcadas.
+    // '#' 35, '*' 42, '1' 49 marcado; '.' 46, '0' 48, '_' 95 sin marcar.
+    // El resto (espacios, saltos de línea, tabulaciones) se ignora.
+    function celdasMarcadas(dibujo: string, total: number): boolean[] {
+        const celdas: boolean[] = [];
+        for (let p = 0; p < dibujo.length && celdas.length < total; p++) {
+            const c = dibujo.charCodeAt(p);
+            if (c == 35 || c == 42 || c == 49) {
+                celdas.push(true);
+            } else if (c == 46 || c == 48 || c == 95) {
+                celdas.push(false);
+            }
+        }
+        while (celdas.length < total) celdas.push(false);
+        return celdas;
+    }
 
     function lcdEnsureInit(): void {
         if (lcdInicializado) return;
@@ -905,6 +1037,17 @@ namespace beatMundial {
             tiraRgbBuffers[index] = buf;
         }
         return buf;
+    }
+
+    // Pinta con un color 0xRRGGBB los LEDs marcados en la grilla. Los no marcados
+    // conservan el color que tenían, porque el buffer de cada puerto es persistente.
+    function tiraRgbPintar(leds: string, tono: number, puerto: BeatPuerto): void {
+        const buf = tiraRgbBuffer(puerto);
+        const marcados = celdasMarcadas(leds, TIRA_RGB_LEDS);
+        for (let i = 0; i < TIRA_RGB_LEDS; i++) {
+            if (marcados[i]) tiraRgbSetPixel(buf, i, tono);
+        }
+        tiraRgbMostrar(buf, puerto);
     }
 
     // Guarda un color 0xRRGGBB en el buffer, en el orden GRB que esperan los WS2812B.
