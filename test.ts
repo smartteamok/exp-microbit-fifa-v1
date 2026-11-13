@@ -2,7 +2,7 @@
 
 // Usa cada bloque al menos una vez para que `pxt test` valide todas las firmas.
 
-beatMundial.deshabilitarMatriz();
+beatMundial.pantallaMicrobit(BeatPantallaAccion.Deshabilitar);
 
 // Eventos
 beatMundial.alPulsarBoton(BeatPuerto.Puerto0, () => {
@@ -20,8 +20,14 @@ beatMundial.alDetectarUltrasonido(20, BeatPuertoUno.Puerto1, () => {
 beatMundial.alDetectarColor(BeatColorDetectado.Verde, BeatPuertoI2C.IIC, () => {
     beatMundial.tiraRgbColor(`# . # . # .`, 0x00ff00, BeatPuerto.Puerto0);
 });
-beatMundial.alMoverJoystick(BeatJoystickEje.EjeY, BeatPuertoUno.Puerto1, () => {
+beatMundial.alMoverJoystick(BeatJoystickDireccion.MasY, BeatPuertoUno.Puerto1, () => {
     beatMundial.servoPosicionar(180, BeatPuerto.Puerto0);
+});
+beatMundial.alMoverJoystick(BeatJoystickDireccion.MenosX, BeatPuertoUno.Puerto1, () => {
+    beatMundial.servoPosicionar(0, BeatPuerto.Puerto0);
+});
+beatMundial.alPulsarJoystick(BeatPuertoUno.Puerto1, () => {
+    beatMundial.ledBrillo(128, BeatPuerto.Puerto1);
 });
 beatMundial.alSeguirLinea(BeatPosicionLinea.Centro, BeatPuertoUno.Puerto1, () => {
     beatMundial.moverVelocidad(BeatDireccion.Adelante, BeatMotor.Ambos, 60);
@@ -60,11 +66,14 @@ basic.forever(() => {
         . # . . . . # .
         # . . . . . . #
         `, BeatPuertoI2C.IIC);
-    beatMundial.matrizDesplazar("GOL", 100, BeatPuertoI2C.IIC);
+    beatMundial.matrizDesplazar("GOL", BeatPuertoI2C.IIC);
+    beatMundial.matrizDesplazarNumero(total, BeatPuertoI2C.IIC);
     beatMundial.matrizBorrar(BeatPuertoI2C.IIC);
-    beatMundial.lcdMostrar("Total " + total, 0, 0, BeatPuertoI2C.IIC);
-    beatMundial.lcdMostrar("Logicas " + logicas, 0, 1, BeatPuertoI2C.IIC);
+    beatMundial.lcdMostrar("Logicas", 0, 0, BeatPuertoI2C.IIC);
+    beatMundial.lcdMostrarNumero(logicas, 8, 0, BeatPuertoI2C.IIC);
+    beatMundial.lcdMostrarNumero(total, 0, 1, BeatPuertoI2C.IIC);
     beatMundial.lcdBorrar(BeatPuertoI2C.IIC);
+    beatMundial.ledBrillo(0, BeatPuerto.Puerto1);
 
     // Motores
     beatMundial.servoMoverGradual(0, 5, BeatPuerto.Puerto0);
@@ -74,4 +83,4 @@ basic.forever(() => {
     basic.pause(100);
 });
 
-beatMundial.habilitarMatriz();
+beatMundial.pantallaMicrobit(BeatPantallaAccion.Habilitar);

@@ -7,12 +7,14 @@ Los bloques se agrupan según lo que hacen o devuelven, y cada grupo tiene su to
 
 | Grupo | Color | Bloques |
 |---|---|---|
-| Eventos | naranja claro | al pulsar BOTÓN, al tocar TÁCTIL, si hay OBSTÁCULO, si DISTANCIA es menor a, al detectar COLOR, al cambiar eje del JOYSTICK, al seguir LÍNEA |
+| Eventos | naranja claro | al pulsar BOTÓN, al tocar TÁCTIL, si hay OBSTÁCULO, si DISTANCIA es menor a, al detectar COLOR, al mover JOYSTICK hacia +X/-X/+Y/-Y, al pulsar BOTÓN del JOYSTICK, al seguir LÍNEA |
 | Entradas lógicas | naranja claro | BOTÓN, TÁCTIL, JOYSTICK pulsado, LÍNEA, COLOR detectado, OBSTÁCULO |
 | Entradas numéricas | naranja claro | DISTANCIA, TEMPERATURA / HUMEDAD (DHT11), LUZ, HUMEDAD DEL SUELO, POTENCIÓMETRO, JOYSTICK X/Y, nivel de COLOR |
-| Salidas | naranja medio | LED, COLOR RGB (tira de 6 LEDs), MATRIZ 8x8, LCD |
+| Salidas | naranja medio | LED (prender/apagar y brillo), COLOR RGB (tira de 6 LEDs), MATRIZ 8x8 (texto y NÚMERO), LCD (texto y NÚMERO) |
 | Motores | naranja oscuro | MOTOR, SERVO, HÉLICE |
-| … más | naranja medio | habilitar / deshabilitar PANTALLA del micro:bit |
+
+La subcategoría **••• más**, en el índice debajo de FIFA Foundation, tiene el bloque
+"[deshabilitar ▾] PANTALLA del micro:bit".
 
 ## Qué maneja
 - Motores DC con control de dirección y velocidad.
@@ -22,10 +24,11 @@ Los bloques se agrupan según lo que hacen o devuelven, y cada grupo tiene su to
 - Joystick (ejes X/Y y pulsador) y sensor de color (canales RGB y detección).
 - Eventos: los bloques "al …" ejecutan su contenido una vez cada vez que la condición
   empieza a cumplirse (por ejemplo, al pulsar el botón), sin necesidad de un "para siempre".
-- LED simple: prender y apagar en cualquiera de los 4 puertos.
+- LED simple: prender, apagar y ajustar el brillo (0 a 255) en cualquiera de los 4 puertos.
 - Tira RGB: se marcan en una grilla los LEDs (0 a 5) que toman el color.
-- Matriz 8x8 I2C (HT16K33, dirección 0x70): dibujo, texto en movimiento y borrado.
-- Pantalla LCD I2C.
+- Matriz 8x8 I2C (HT16K33, dirección 0x70): dibujo, texto o número en movimiento (velocidad
+  fija de 200 ms por columna) y borrado.
+- Pantalla LCD I2C: texto o número en una posición (x, y).
 - Actuadores: servos y hélice.
 
 ## Puertos

@@ -62,12 +62,12 @@ enum BeatPuertoI2C {
 }
 
 enum BeatFanAccion {
-    //% block="stop"
-    Parar = 2,
     //% block="turn left"
     Izquierda = 0,
     //% block="turn right"
-    Derecha = 1
+    Derecha = 1,
+    //% block="stop"
+    Parar = 2
 }
 
 enum BeatJoystickEje {
@@ -75,6 +75,24 @@ enum BeatJoystickEje {
     EjeX = 0,
     //% block="Y axis"
     EjeY = 1
+}
+
+enum BeatJoystickDireccion {
+    //% block="+X"
+    MasX = 0,
+    //% block="-X"
+    MenosX = 1,
+    //% block="+Y"
+    MasY = 2,
+    //% block="-Y"
+    MenosY = 3
+}
+
+enum BeatPantallaAccion {
+    //% block="disable"
+    Deshabilitar = 0,
+    //% block="enable"
+    Habilitar = 1
 }
 
 enum BeatColorCanal {
@@ -110,7 +128,7 @@ enum BeatMagnitudDHT {
 }
 
 //% color="#ed6a22" weight=200 icon="" block="FIFA Foundation"
-//% groups='["Events","Logic inputs","Numeric inputs","Outputs","Motors","More"]'
+//% groups='["Events","Logic inputs","Numeric inputs","Outputs","Motors"]'
 namespace beatMundial {
 
     // Colores por función:
@@ -194,16 +212,29 @@ namespace beatMundial {
     }
 
     /**
-     * Runs the code inside when the joystick axis moves away from the center.
+     * Runs the code inside when the joystick moves in the selected direction
+     * (+X, -X, +Y or -Y) away from the center.
      */
-    //% block="on JOYSTICK $eje change on $puerto"
-    //% eje.defl=BeatJoystickEje.EjeX
+    //% block="on JOYSTICK moved $direccion on $puerto"
+    //% direccion.defl=BeatJoystickDireccion.MasX
     //% puerto.defl=BeatPuertoUno.Puerto1
     //% group="Events"
     //% color="#F28B3A"
     //% weight=95
-    export function alMoverJoystick(eje: BeatJoystickEje, puerto: BeatPuertoUno, handler: () => void): void {
-        vigilar(() => Math.abs(leerJoystick(eje, puerto) - JOYSTICK_CENTRO) > JOYSTICK_ZONA_MUERTA, handler);
+    export function alMoverJoystick(direccion: BeatJoystickDireccion, puerto: BeatPuertoUno, handler: () => void): void {
+        vigilar(() => joystickEnDireccion(direccion, puerto), handler);
+    }
+
+    /**
+     * Runs the code inside when the joystick button is pressed.
+     */
+    //% block="on JOYSTICK BUTTON pressed on $puerto"
+    //% puerto.defl=BeatPuertoUno.Puerto1
+    //% group="Events"
+    //% color="#F28B3A"
+    //% weight=94
+    export function alPulsarJoystick(puerto: BeatPuertoUno, handler: () => void): void {
+        vigilar(() => joystickPulsado(puerto), handler);
     }
 
     /**
@@ -214,7 +245,7 @@ namespace beatMundial {
     //% puerto.defl=BeatPuertoUno.Puerto1
     //% group="Events"
     //% color="#F28B3A"
-    //% weight=94
+    //% weight=93
     export function alSeguirLinea(posicion: BeatPosicionLinea, puerto: BeatPuertoUno, handler: () => void): void {
         vigilar(() => siguelineas(posicion, puerto), handler);
     }
@@ -458,9 +489,23 @@ namespace beatMundial {
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Outputs"
     //% color="#D9591A"
-    //% weight=70
+    //% weight=72
     export function ledSimple(accion: BeatLedAccion, puerto: BeatPuerto): void {
         pins.digitalWritePin(getDigitalPin(puerto), <number>accion);
+    }
+
+    /**
+     * Sets the brightness of an LED connected to the given port (0 to 255).
+     */
+    //% block="set LED brightness to $brillo on $puerto"
+    //% brillo.min=0 brillo.max=255 brillo.defl=255
+    //% puerto.defl=BeatPuerto.Puerto0
+    //% group="Outputs"
+    //% color="#D9591A"
+    //% weight=71
+    export function ledBrillo(brillo: number, puerto: BeatPuerto): void {
+        const valor = Math.round(pins.map(clamp(brillo, 0, 255), 0, 255, 0, 1023));
+        pins.analogWritePin(getPinPwm(puerto), valor);
     }
 
     /**
@@ -475,7 +520,7 @@ namespace beatMundial {
     //% inlineInputMode=inline
     //% group="Outputs"
     //% color="#D9591A"
-    //% weight=69
+    //% weight=70
     export function tiraRgbColor(leds: string, tono: number, puerto: BeatPuerto): void {
         tiraRgbPintar(leds, tono, puerto);
     }
@@ -494,7 +539,7 @@ namespace beatMundial {
     //% inlineInputMode=inline
     //% group="Outputs"
     //% color="#D9591A"
-    //% weight=68
+    //% weight=69
     export function tiraRgbLed(leds: string, r: number, g: number, b: number, puerto: BeatPuerto): void {
         const tono = (clamp(r, 0, 255) << 16) | (clamp(g, 0, 255) << 8) | clamp(b, 0, 255);
         tiraRgbPintar(leds, tono, puerto);
@@ -507,7 +552,7 @@ namespace beatMundial {
     //% puerto.defl=BeatPuerto.Puerto0
     //% group="Outputs"
     //% color="#D9591A"
-    //% weight=67
+    //% weight=68
     export function tiraRgbApagar(puerto: BeatPuerto): void {
         const buf = tiraRgbBuffer(puerto);
         buf.fill(0);
@@ -527,7 +572,7 @@ namespace beatMundial {
     //% inlineInputMode=external
     //% group="Outputs"
     //% color="#D9591A"
-    //% weight=66
+    //% weight=67
     export function matrizDibujar(dibujo: string, puerto: BeatPuertoI2C): void {
         matrizInit();
         const celdas = celdasMarcadas(dibujo, 64);
@@ -542,21 +587,28 @@ namespace beatMundial {
      * Scrolls text from right to left across the 8x8 matrix.
      * Blocks execution until the scroll finishes.
      */
-    //% block="scroll on MATRIX $texto every $ms ms on $puerto"
+    //% block="scroll on MATRIX $texto on $puerto"
     //% texto.defl="abc"
-    //% ms.min=20 ms.max=1000 ms.defl=200
+    //% puerto.defl=BeatPuertoI2C.IIC
+    //% group="Outputs"
+    //% color="#D9591A"
+    //% weight=66
+    export function matrizDesplazar(texto: string, puerto: BeatPuertoI2C): void {
+        matrizDesplazarTexto(texto);
+    }
+
+    /**
+     * Scrolls a number from right to left across the 8x8 matrix.
+     * Blocks execution until the scroll finishes.
+     */
+    //% block="scroll NUMBER on MATRIX $numero on $puerto"
+    //% numero.defl=0
     //% puerto.defl=BeatPuertoI2C.IIC
     //% group="Outputs"
     //% color="#D9591A"
     //% weight=65
-    export function matrizDesplazar(texto: string, ms: number, puerto: BeatPuertoI2C): void {
-        matrizInit();
-        const cols = matrizColumnasTexto(texto);
-        const espera = clamp(ms, 20, 1000);
-        for (let offset = -8; offset <= cols.length; offset++) {
-            matrizDibujarVentana(cols, offset);
-            basic.pause(espera);
-        }
+    export function matrizDesplazarNumero(numero: number, puerto: BeatPuertoI2C): void {
+        matrizDesplazarTexto("" + numero);
     }
 
     /**
@@ -577,6 +629,7 @@ namespace beatMundial {
      * Writes text on the LCD at position (x, y).
      */
     //% block="write on LCD $texto at x $x y $y on $puerto"
+    //% texto.defl="abc"
     //% x.min=0 x.max=15 x.defl=0
     //% y.min=0 y.max=1 y.defl=0
     //% puerto.defl=BeatPuertoI2C.IIC
@@ -594,43 +647,50 @@ namespace beatMundial {
     }
 
     /**
+     * Writes a number on the LCD at position (x, y).
+     */
+    //% block="write NUMBER on LCD $numero at x $x y $y on $puerto"
+    //% numero.defl=0
+    //% x.min=0 x.max=15 x.defl=0
+    //% y.min=0 y.max=1 y.defl=0
+    //% puerto.defl=BeatPuertoI2C.IIC
+    //% inlineInputMode=inline
+    //% group="Outputs"
+    //% color="#D9591A"
+    //% weight=62
+    export function lcdMostrarNumero(numero: number, x: number, y: number, puerto: BeatPuertoI2C): void {
+        lcdMostrar("" + numero, x, y, puerto);
+    }
+
+    /**
      * Clears the LCD screen.
      */
     //% block="clear LCD on $puerto"
     //% puerto.defl=BeatPuertoI2C.IIC
     //% group="Outputs"
     //% color="#D9591A"
-    //% weight=62
+    //% weight=61
     export function lcdBorrar(puerto: BeatPuertoI2C): void {
         lcdEnsureInit();
         lcdCommand(0x01);
         basic.pause(2);
     }
 
-    // --- GRUPO: … MÁS ---
+    // --- SUBCATEGORÍA "… MÁS" (advanced=true: aparece en el índice bajo FIFA Foundation) ---
 
     /**
-     * Disables the micro:bit's display (LED matrix).
-     * Use it in "on start" to avoid interference with the line follower
+     * Disables or enables the micro:bit's display (LED matrix).
+     * Disable it in "on start" to avoid interference with the line follower
      * and the joystick button (P10).
      */
-    //% block="disable micro:bit DISPLAY"
-    //% group="More"
-    //% color="#D9591A"
-    //% weight=61
-    export function deshabilitarMatriz(): void {
-        led.enable(false);
-    }
-
-    /**
-     * Enables the micro:bit's display (LED matrix).
-     */
-    //% block="enable micro:bit DISPLAY"
-    //% group="More"
+    //% block="$accion micro:bit DISPLAY"
+    //% accion.defl=BeatPantallaAccion.Deshabilitar
+    //% advanced=true
+    //% group="Outputs"
     //% color="#D9591A"
     //% weight=60
-    export function habilitarMatriz(): void {
-        led.enable(true);
+    export function pantallaMicrobit(accion: BeatPantallaAccion): void {
+        led.enable(accion == BeatPantallaAccion.Habilitar);
     }
 
     // --- GRUPO: MOTORES ---
@@ -737,7 +797,7 @@ namespace beatMundial {
     //% color="#9E3E10"
     //% weight=47
     export function servoPosicionar(grados: number, puerto: BeatPuerto): void {
-        const pin = getServoPin(puerto);
+        const pin = getPinPwm(puerto);
         const clamped = clampServoAngle(grados);
         pins.servoWritePin(pin, clamped);
         servoPosiciones[puertoIndex(puerto)] = clamped;
@@ -754,7 +814,7 @@ namespace beatMundial {
     //% color="#9E3E10"
     //% weight=46
     export function servoMoverGradual(grados: number, ms: number, puerto: BeatPuerto): void {
-        const pin = getServoPin(puerto);
+        const pin = getPinPwm(puerto);
         const target = clampServoAngle(grados);
         const index = puertoIndex(puerto);
         let current = servoPosiciones[index];
@@ -776,7 +836,7 @@ namespace beatMundial {
      * Controls the fan. Pins: P2 and P1.
      */
     //% block="$accion FAN on $puerto"
-    //% accion.defl=BeatFanAccion.Parar
+    //% accion.defl=BeatFanAccion.Izquierda
     //% puerto.defl=BeatPuertoUno.Puerto1
     //% group="Motors"
     //% color="#9E3E10"
@@ -826,6 +886,23 @@ namespace beatMundial {
     const matrizBuffer = [0, 0, 0, 0, 0, 0, 0, 0];
     const JOYSTICK_CENTRO = 512;
     const JOYSTICK_ZONA_MUERTA = 100;   // margen alrededor del centro para ignorar el temblor
+    const MATRIZ_DESPLAZAR_MS = 200;    // velocidad fija del texto en movimiento (ms por columna)
+
+    // Devuelve true si el joystick está inclinado hacia la dirección pedida, fuera
+    // de la zona muerta. "+" es un valor del eje por encima del centro (~512).
+    // Si en el kit "+" y "-" salen invertidos, cambiar acá el signo.
+    function joystickEnDireccion(direccion: BeatJoystickDireccion, puerto: BeatPuertoUno): boolean {
+        switch (direccion) {
+            case BeatJoystickDireccion.MasX:
+                return leerJoystick(BeatJoystickEje.EjeX, puerto) > JOYSTICK_CENTRO + JOYSTICK_ZONA_MUERTA;
+            case BeatJoystickDireccion.MenosX:
+                return leerJoystick(BeatJoystickEje.EjeX, puerto) < JOYSTICK_CENTRO - JOYSTICK_ZONA_MUERTA;
+            case BeatJoystickDireccion.MasY:
+                return leerJoystick(BeatJoystickEje.EjeY, puerto) > JOYSTICK_CENTRO + JOYSTICK_ZONA_MUERTA;
+            default:
+                return leerJoystick(BeatJoystickEje.EjeY, puerto) < JOYSTICK_CENTRO - JOYSTICK_ZONA_MUERTA;
+        }
+    }
 
     // --- Eventos ---
     // Un único ciclo en segundo plano revisa cada condición registrada y, cuando pasa
@@ -1009,6 +1086,16 @@ namespace beatMundial {
         pins.i2cWriteBuffer(HT16K33_ADDR, buf);
     }
 
+    // Desplaza un texto de derecha a izquierda por la matriz, a velocidad fija.
+    function matrizDesplazarTexto(texto: string): void {
+        matrizInit();
+        const cols = matrizColumnasTexto(texto);
+        for (let offset = -8; offset <= cols.length; offset++) {
+            matrizDibujarVentana(cols, offset);
+            basic.pause(MATRIZ_DESPLAZAR_MS);
+        }
+    }
+
     function matrizColumnasTexto(texto: string): number[] {
         const cols: number[] = [];
         for (let i = 0; i < texto.length; i++) {
@@ -1092,7 +1179,8 @@ namespace beatMundial {
         }
     }
 
-    function getServoPin(puerto: BeatPuerto): AnalogPin {
+    // Pin del puerto como AnalogPin, para PWM (servo y brillo del LED).
+    function getPinPwm(puerto: BeatPuerto): AnalogPin {
         return <AnalogPin><number>getDigitalPin(puerto);
     }
 
