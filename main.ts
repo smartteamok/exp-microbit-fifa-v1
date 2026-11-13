@@ -601,7 +601,7 @@ namespace beatMundial {
      * Scrolls a number from right to left across the 8x8 matrix.
      * Blocks execution until the scroll finishes.
      */
-    //% block="scroll NUMBER on MATRIX $numero on $puerto"
+    //% block="scroll on MATRIX $numero on $puerto"
     //% numero.defl=0
     //% puerto.defl=BeatPuertoI2C.IIC
     //% group="Outputs"
@@ -649,7 +649,7 @@ namespace beatMundial {
     /**
      * Writes a number on the LCD at position (x, y).
      */
-    //% block="write NUMBER on LCD $numero at x $x y $y on $puerto"
+    //% block="write on LCD $numero at x $x y $y on $puerto"
     //% numero.defl=0
     //% x.min=0 x.max=15 x.defl=0
     //% y.min=0 y.max=1 y.defl=0

@@ -10,7 +10,7 @@ Los bloques se agrupan según lo que hacen o devuelven, y cada grupo tiene su to
 | Eventos | naranja claro | al pulsar BOTÓN, al tocar TÁCTIL, si hay OBSTÁCULO, si DISTANCIA es menor a, al detectar COLOR, al mover JOYSTICK hacia +X/-X/+Y/-Y, al pulsar BOTÓN del JOYSTICK, al seguir LÍNEA |
 | Entradas lógicas | naranja claro | BOTÓN, TÁCTIL, JOYSTICK pulsado, LÍNEA, COLOR detectado, OBSTÁCULO |
 | Entradas numéricas | naranja claro | DISTANCIA, TEMPERATURA / HUMEDAD (DHT11), LUZ, HUMEDAD DEL SUELO, POTENCIÓMETRO, JOYSTICK X/Y, nivel de COLOR |
-| Salidas | naranja medio | LED (prender/apagar y brillo), COLOR RGB (tira de 6 LEDs), MATRIZ 8x8 (texto y NÚMERO), LCD (texto y NÚMERO) |
+| Salidas | naranja medio | LED (prender/apagar y brillo), COLOR RGB (tira de 6 LEDs), MATRIZ 8x8 (texto o número), LCD (texto o número) |
 | Motores | naranja oscuro | MOTOR, SERVO, HÉLICE |
 
 La subcategoría **••• más**, en el índice debajo de FIFA Foundation, tiene el bloque

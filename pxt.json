@@ -1,6 +1,6 @@
 {
     "name": "FIFA Foundation",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "description": "Extensión para el kit del Digital Education Programme de FIFA Foundation",
     "license": "MIT",
     "dependencies": {
